@@ -1,0 +1,814 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.27.1 by Michael Rose
+  Copyright 2013-2025 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>AWS CLI v2 — Installation, Setup, and Programmatic Access (Beginner → Pro) - DataInsideData™ Staging</title>
+<meta name="description" content="A step‑by‑step guide to installing AWS CLI v2, configuring IAM credentials, and using the CLI for real programmatic access to AWS services.">
+
+
+  <meta name="author" content="Fari Lindo">
+  
+  <meta property="article:author" content="Fari Lindo">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="DataInsideData™ Staging">
+<meta property="og:title" content="AWS CLI v2 — Installation, Setup, and Programmatic Access (Beginner → Pro)">
+<meta property="og:url" content="https://dataeden.github.io/did-builder-showcase-staging/how-tos/aws-cli-v2-programmatic-access-guide/">
+
+
+  <meta property="og:description" content="A step‑by‑step guide to installing AWS CLI v2, configuring IAM credentials, and using the CLI for real programmatic access to AWS services.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2026-08-01T11:30:50+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="https://dataeden.github.io/did-builder-showcase-staging/how-tos/aws-cli-v2-programmatic-access-guide/">
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/did-builder-showcase-staging/feed.xml" type="application/atom+xml" rel="alternate" title="DataInsideData™ Staging Feed">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+  
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/did-builder-showcase-staging/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css"></noscript>
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/did-builder-showcase-staging/assets/images/imgs/apple-touch-icon-180.png">
+
+<link rel="icon" type="image/png" href="/did-builder-showcase-staging/assets/images/imgs/site-icon-512.png">
+
+<link rel="icon" type="image/x-icon" href="/did-builder-showcase-staging/assets/images/imgs/favicon.ico">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/did-builder-showcase-staging/assets/images/imgs/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/did-builder-showcase-staging/assets/images/imgs/favicon-16.png">
+
+
+  </head>
+
+  <body class="layout--single" dir="ltr">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/did-builder-showcase-staging/"><img src="/did-builder-showcase-staging/assets/images/logos/FuturisticBrand.png" alt="DataInsideData™ Staging"></a>
+        
+        <a class="site-title" href="/did-builder-showcase-staging/">
+          DataInsideData™ Staging
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/"
+                
+                
+              >Start Here</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/blog/"
+                
+                
+              >Posts</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/projects/"
+                
+                
+              >Projects</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/how-tos/"
+                
+                
+              >How Tos</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/fixes/"
+                
+                
+              >Fixes</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/about/"
+                
+                
+              >About</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/contact/"
+                
+                
+              >Contact</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+    
+      <nav class="nav__list">
+  
+  <input id="ac-toc" name="accordion-toc" type="checkbox" />
+  <label for="ac-toc">Toggle Menu</label>
+  <ul class="nav__items">
+    
+      
+      
+    
+  </ul>
+</nav>
+
+    
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="AWS CLI v2 — Installation, Setup, and Programmatic Access (Beginner → Pro)">
+    <meta itemprop="description" content="A step‑by‑step guide to installing AWS CLI v2, configuring IAM credentials, and using the CLI for real programmatic access to AWS services.">
+    <meta itemprop="datePublished" content="2026-08-01T11:30:50+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">
+            <a href="https://dataeden.github.io/did-builder-showcase-staging/how-tos/aws-cli-v2-programmatic-access-guide/" itemprop="url">AWS CLI v2 — Installation, Setup, and Programmatic Access (Beginner → Pro)
+</a>
+          </h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          4 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-layer-group"></i> Technical Breakdown</h4></header>
+              <ul class="toc__menu"><li><a href="#what-this-guide-covers">What This Guide Covers</a></li><li><a href="#why-aws-cli">Why AWS CLI?</a></li><li><a href="#installing-aws-cli-v2">Installing AWS CLI v2</a><ul><li><a href="#windows-recommended-msi-installer">Windows (Recommended: MSI Installer)</a></li><li><a href="#verify-installation">Verify installation</a></li></ul></li><li><a href="#understanding-aws-authentication">Understanding AWS Authentication</a><ul><li><a href="#a-console-credentials-browser-login">A. Console Credentials (Browser Login)</a></li><li><a href="#b-programmatic-credentials-cli--api-access">B. Programmatic Credentials (CLI / API Access)</a></li></ul></li><li><a href="#creating-an-access-key-iam">Creating an Access Key (IAM)</a></li><li><a href="#configuring-aws-cli-credentials">Configuring AWS CLI Credentials</a><ul><li><a href="#verifying-your-connection">Verifying Your Connection</a></li></ul></li><li><a href="#common-aws-cli-errors--how-to-fix-them">Common AWS CLI Errors &amp; How to Fix Them</a><ul><li><a href="#-aws--the-term-aws-is-not-recognized">❌ aws : The term 'aws' is not recognized</a></li><li><a href="#-unable-to-locate-credentials">❌ Unable to locate credentials</a></li><li><a href="#-signaturedoesnotmatch">❌ SignatureDoesNotMatch</a></li></ul></li><li><a href="#understanding-regions">Understanding Regions</a></li><li><a href="#basic-aws-cli-usage-examples">Basic AWS CLI Usage Examples</a></li><li><a href="#programmatic-configuration-with-ssm-parameter-store">Programmatic Configuration with SSM Parameter Store</a></li><li><a href="#powershell-tips-for-aws-cli">PowerShell Tips for AWS CLI</a></li><li><a href="#key-takeaways">Key Takeaways</a></li></ul>
+            </nav>
+          </aside>
+        
+        <h2 id="what-this-guide-covers">What This Guide Covers</h2>
+
+<p>This guide walks through installing and configuring <strong>AWS Command Line Interface (CLI) v2</strong> on Windows, and using it effectively in real-world cloud workflows.</p>
+
+<p>You’ll learn how to:</p>
+
+<ul>
+  <li>Install AWS CLI v2 using the official MSI installer</li>
+  <li>Verify installation and confirm the CLI is available in PowerShell</li>
+  <li>Understand the difference between AWS Console credentials and programmatic credentials</li>
+  <li>Create IAM access keys for CLI and automation workflows</li>
+  <li>Configure the CLI using <code class="language-plaintext highlighter-rouge">aws configure</code> and understand where credentials are stored</li>
+  <li>Use <code class="language-plaintext highlighter-rouge">aws sts get-caller-identity</code> to verify authentication</li>
+  <li>Troubleshoot common AWS CLI errors and misconfigurations</li>
+  <li>Work with regions, defaults, and configuration profiles</li>
+  <li>Run essential AWS CLI commands for Lambda, IAM, and SSM</li>
+  <li>Use SSM Parameter Store for programmatic configuration management</li>
+  <li>Apply PowerShell-specific tips for cleaner, more reliable CLI usage</li>
+  <li>Build reproducible, professional cloud workflows from the terminal</li>
+</ul>
+
+<p>This guide is written for learners ready to move beyond the AWS Console and start working <strong>pro-style</strong> from the command line.</p>
+
+<hr />
+
+<h2 id="why-aws-cli">Why AWS CLI?</h2>
+
+<p>The AWS Command Line Interface (CLI) allows you to:</p>
+
+<ul>
+  <li>Interact with AWS services programmatically</li>
+  <li>Automate workflows (Lambda, SES, SSM, etc.)</li>
+  <li>Practice real infrastructure operations</li>
+  <li>Prepare for DevOps / Cloud / Security roles</li>
+</ul>
+
+<p>If you want to build reproducible systems, the CLI is essential.</p>
+
+<h2 id="installing-aws-cli-v2">Installing AWS CLI v2</h2>
+
+<h3 id="windows-recommended-msi-installer">Windows (Recommended: MSI Installer)</h3>
+
+<ol>
+  <li>
+    <p>Go to the official AWS CLI page:<br />
+<a href="https://aws.amazon.com/cli/">https://aws.amazon.com/cli/</a></p>
+  </li>
+  <li>
+    <p>Download <strong>AWS CLI v2 – Windows 64-bit</strong></p>
+  </li>
+  <li>Run the installer
+    <ul>
+      <li>Leave <strong>“Add AWS CLI to PATH”</strong> checked</li>
+      <li>Install for all users (recommended)</li>
+    </ul>
+  </li>
+  <li>Restart PowerShell</li>
+</ol>
+
+<h3 id="verify-installation">Verify installation</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws <span class="nt">--version</span>
+</code></pre></div></div>
+
+<p>Expected output:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws-cli/2.x.x Python/3.x Windows/...
+</code></pre></div></div>
+
+<h2 id="understanding-aws-authentication">Understanding AWS Authentication</h2>
+
+<p>AWS uses two primary credential types, depending on how you access services:</p>
+
+<h3 id="a-console-credentials-browser-login">A. Console Credentials (Browser Login)</h3>
+
+<p>Used for:</p>
+
+<ul>
+  <li>AWS Management Console</li>
+  <li>Navigating services like IAM, Lambda, SES, S3, etc.</li>
+  <li>Manual configuration through the web interface</li>
+</ul>
+
+<p>Credentials include:</p>
+
+<ul>
+  <li>IAM username</li>
+  <li>Password</li>
+  <li>Optional Multi-Factor Authentication (MFA) — strongly recommended</li>
+</ul>
+
+<hr />
+
+<h3 id="b-programmatic-credentials-cli--api-access">B. Programmatic Credentials (CLI / API Access)</h3>
+
+<p>Used for:</p>
+
+<ul>
+  <li>AWS CLI</li>
+  <li>SDKs (e.g., boto3 for Python)</li>
+  <li>Infrastructure automation</li>
+  <li>CI/CD pipelines</li>
+  <li>Scripts and serverless workflows</li>
+</ul>
+
+<p>Credentials include:</p>
+
+<ul>
+  <li>Access Key ID</li>
+  <li>Secret Access Key</li>
+</ul>
+
+<p>👉 <strong>Important:</strong> Programmatic credentials are completely separate from your console username and password.</p>
+
+<p>They are designed for machine-to-machine authentication and should be stored securely and never committed to source control.</p>
+
+<h2 id="creating-an-access-key-iam">Creating an Access Key (IAM)</h2>
+
+<ul>
+  <li>Open AWS Console → IAM</li>
+  <li>Click Users</li>
+  <li>Select your IAM user</li>
+  <li>Go to Security credentials</li>
+  <li>Under Access keys, click Create access key</li>
+  <li>Choose Command Line Interface (CLI)</li>
+</ul>
+
+<p>⚠️ Download or securely store the key — the secret is shown only once.</p>
+
+<h2 id="configuring-aws-cli-credentials">Configuring AWS CLI Credentials</h2>
+
+<p>In PowerShell run the following command:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  aws configure
+</code></pre></div></div>
+
+<p>You’ll be prompted for the following information:</p>
+
+<ul>
+  <li>AWS Access Key ID</li>
+  <li>AWS Secret Access Key</li>
+  <li>Default region (example: us-east-1)</li>
+  <li>Default output format (json)</li>
+</ul>
+
+<p>This creates files at:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  C:<span class="se">\U</span>sers<span class="se">\&lt;</span>you&gt;<span class="se">\.</span>aws<span class="se">\c</span>redentials
+  C:<span class="se">\U</span>sers<span class="se">\&lt;</span>you&gt;<span class="se">\.</span>aws<span class="se">\c</span>onfig
+</code></pre></div></div>
+
+<h3 id="verifying-your-connection">Verifying Your Connection</h3>
+
+<p>Run the command:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws sts get-caller-identity
+</code></pre></div></div>
+
+<p>Expected output:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"UserId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"Account"</span><span class="p">:</span><span class="w"> </span><span class="s2">"123456789012"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"Arn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"arn:aws:iam::123456789012:user/your-user"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>If you see this, your CLI is authenticated and ready.</p>
+
+<h2 id="common-aws-cli-errors--how-to-fix-them">Common AWS CLI Errors &amp; How to Fix Them</h2>
+
+<p>Even experienced engineers run into configuration issues. Below are some of the most common AWS CLI errors and how to resolve them quickly.</p>
+
+<hr />
+
+<h3 id="-aws--the-term-aws-is-not-recognized">❌ <code class="language-plaintext highlighter-rouge">aws : The term 'aws' is not recognized</code></h3>
+
+<p><strong>What it means:</strong><br />
+PowerShell cannot find the AWS CLI executable.</p>
+
+<p><strong>Common causes:</strong></p>
+
+<ul>
+  <li>AWS CLI was not installed successfully</li>
+  <li>The system PATH variable was not updated</li>
+  <li>PowerShell session was not restarted after installation</li>
+</ul>
+
+<p><strong>Fix:</strong></p>
+
+<ol>
+  <li>Confirm installation in:</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C:<span class="se">\P</span>rogram Files<span class="se">\A</span>mazon<span class="se">\A</span>WSCLIV2<span class="se">\</span>
+</code></pre></div></div>
+
+<ol>
+  <li>Restart PowerShell</li>
+  <li>Run:</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws <span class="nt">--version</span>
+</code></pre></div></div>
+
+<p>If the command still fails, verify your PATH environment variable includes the AWS CLI installation directory.</p>
+
+<hr />
+
+<h3 id="-unable-to-locate-credentials">❌ <code class="language-plaintext highlighter-rouge">Unable to locate credentials</code></h3>
+
+<p><strong>What it means:</strong><br />
+AWS CLI cannot find valid credentials for authentication.</p>
+
+<p><strong>Common causes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">aws configure</code> was never run</li>
+  <li>Credentials were entered incorrectly</li>
+  <li>Credentials were saved under a different Windows user profile</li>
+  <li>You’re using a named profile but didn’t specify it</li>
+</ul>
+
+<p><strong>Fix:</strong></p>
+
+<p>Run:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws configure
+</code></pre></div></div>
+
+<p>Then verify credentials exist in:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C:<span class="se">\U</span>sers&lt;your-username&gt;.aws<span class="se">\c</span>redentials
+</code></pre></div></div>
+
+<p>You can also test authentication with:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws sts get-caller-identity
+</code></pre></div></div>
+
+<h3 id="-signaturedoesnotmatch">❌ <code class="language-plaintext highlighter-rouge">SignatureDoesNotMatch</code></h3>
+
+<p><strong>What it means:</strong><br />
+AWS rejected the request because the request signature does not match your credentials.</p>
+
+<p><strong>Common causes:</strong></p>
+
+<ul>
+  <li>Copy/paste errors when entering access keys</li>
+  <li>Hidden trailing spaces</li>
+  <li>Wrong secret key paired with access key</li>
+  <li>Region mismatch</li>
+</ul>
+
+<p><strong>Fix:</strong></p>
+
+<ol>
+  <li>Re-copy the Access Key ID and Secret Access Key directly from IAM</li>
+  <li>Re-run:</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws sts get-caller-identity
+</code></pre></div></div>
+
+<p>If successful, AWS will return your Account ID and IAM ARN.<br />
+If not, your authentication is still misconfigured.</p>
+
+<h2 id="understanding-regions">Understanding Regions</h2>
+
+<ul>
+  <li>Many AWS services are region-specific.</li>
+</ul>
+
+<p>Check current region:</p>
+
+<ul>
+  <li>aws configure get region</li>
+</ul>
+
+<p>Set region:</p>
+
+<ul>
+  <li>aws configure set region us-east-1</li>
+  <li>(SES inbound email is commonly configured in us-east-1.)</li>
+</ul>
+
+<h2 id="basic-aws-cli-usage-examples">Basic AWS CLI Usage Examples</h2>
+
+<p>List Lambda functions</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws lambda list-functions
+</code></pre></div></div>
+
+<p>Inspect a Lambda runtime</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws lambda get-function <span class="sb">`</span>
+  <span class="nt">--function-name</span> my-function <span class="sb">`</span>
+  <span class="nt">--query</span> <span class="s2">"Configuration.Runtime"</span> <span class="sb">`</span>
+  <span class="nt">--output</span> text
+</code></pre></div></div>
+
+<h2 id="programmatic-configuration-with-ssm-parameter-store">Programmatic Configuration with SSM Parameter Store</h2>
+
+<ul>
+  <li>AWS Systems Manager (SSM) Parameter Store is used to store configuration centrally.</li>
+</ul>
+
+<p>Example: upload a JSON config file</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws ssm put-parameter <span class="sb">`</span>
+  <span class="nt">--name</span> <span class="s2">"/myproject/app/config"</span> <span class="sb">`</span>
+  <span class="nt">--type</span> <span class="s2">"String"</span> <span class="sb">`</span>
+  <span class="nt">--value</span> file://config.json <span class="sb">`</span>
+  <span class="nt">--overwrite</span>
+</code></pre></div></div>
+
+<p>Retrieve it:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws ssm get-parameter <span class="nt">--name</span> <span class="s2">"/myproject/app/config"</span>
+</code></pre></div></div>
+
+<p>This pattern allows:</p>
+
+<ul>
+  <li>No hardcoded config in code</li>
+  <li>Runtime configuration updates</li>
+  <li>Cleaner Lambda deployments</li>
+</ul>
+
+<h2 id="powershell-tips-for-aws-cli">PowerShell Tips for AWS CLI</h2>
+
+<ul>
+  <li>Use backticks ` for line continuation</li>
+  <li>Avoid JSON inline when possible</li>
+  <li>Prefer <code class="language-plaintext highlighter-rouge">file:// for structured data</code></li>
+  <li>Always verify with read-only commands first</li>
+</ul>
+
+<p>Check working directory:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">pwd</span>
+</code></pre></div></div>
+
+<p>Confirm files exist:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Test-Path .<span class="se">\c</span>onfig.json
+</code></pre></div></div>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ul>
+  <li>AWS CLI is the foundation of real cloud automation</li>
+  <li>Console access ≠ programmatic access</li>
+  <li>IAM access keys power the CLI</li>
+  <li>SSM Parameter Store is a professional way to manage configuration</li>
+  <li>Always validate before writing or overwriting resources</li>
+</ul>
+
+<blockquote>
+  <p>Built and tested on Windows using AWS CLI v2 and PowerShell.</p>
+</blockquote>
+
+<hr />
+
+<p><strong>Data Inside Data™.</strong></p>
+
+<p><em>Tech Hands, a Science Mind, and a Heart For Community™.</em></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2026-08-01T11:30:50+00:00">August 1, 2026</time></p>
+
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/did-builder-showcase-staging/how-tos/3-supabase-ingestion-how-to/" class="pagination--pager" title="Part 3: Building a Secure Submission Pipeline with Jekyll, Supabase Edge Function, and Postgres">Previous</a>
+    
+    
+      <a href="/did-builder-showcase-staging/how-tos/github-workflow-branch-pr-merge-guide/" class="pagination--pager" title="GitHub Workflow: Branching, Pull Requests, Merging, and Conflict Resolution (Using CLI)">Next</a>
+    
+  </nav>
+
+
+    </div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+      
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <footer class="page__footer" role="contentinfo">
+  <div class="page__footer-inner">
+    <div class="page__footer-grid">
+
+      <!-- LEFT: Title + email + quick links -->
+      <div class="page__footer-col">
+        <h2 class="page__footer-title">DataInsideData™ Staging</h2>
+
+        
+          <p class="page__footer-email">
+            <a href="mailto:contact@datainsidedata.com">contact@datainsidedata.com</a>
+          </p>
+        
+
+    <ul class="page__footer-quicklinks">
+     
+    <li>
+      <a href="/did-builder-showcase-staging/archive/">Archive</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/sitemap.xml">Sitemap</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/feed.xml">RSS</a>
+    </li>
+        
+     </ul>
+
+      </div>
+
+      <!-- MIDDLE: Social links (MM style) -->
+      <div class="page__footer-col">
+        <div class="page__footer-follow">
+          <ul class="social-icons">
+            
+              
+                
+                  <li>
+                    <a href="https://github.com/dataeden" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-github" aria-hidden="true"></i>
+                      <span class="label">GitHub</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="mailto:contact@datainsidedata.com" rel="nofollow noopener noreferrer">
+                      <i class="fas fa-fw fa-envelope" aria-hidden="true"></i>
+                      <span class="label">Email</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="https://www.linkedin.com/" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-linkedin" aria-hidden="true"></i>
+                      <span class="label">LinkedIn</span>
+                    </a>
+                  </li>
+                
+              
+            
+
+            
+              <li>
+                <a href="/did-builder-showcase-staging/feed.xml">
+                  <i class="fas fa-fw fa-rss-square" aria-hidden="true"></i>
+                  <span class="label">Feed</span>
+                </a>
+              </li>
+            
+          </ul>
+        </div>
+      </div>
+
+      <!-- RIGHT: Description -->
+      <div class="page__footer-col">
+        
+          <p class="page__footer-desc">Staging preview for DataInsideData™ and Builder Showcase testing.</p>
+        
+      </div>
+
+    </div>
+
+    <!-- Footer bottom bar (your DID style) -->
+    <div class="footer-bottom">
+      <p class="footer-bottom__copyright">
+        © 2026 Data Inside Data™. All rights reserved.
+      </p>
+
+      <p class="footer-bottom__powered">
+        Powered by
+        <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>,
+        <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a>, and
+        <a href="https://aws.amazon.com/route53/" target="_blank" rel="noopener">AWS Route 53</a>.
+      </p>
+
+      <p class="footer-bottom__legal">
+        <a href="/did-builder-showcase-staging/privacy/">Privacy Policy</a>
+        <span class="footer-bottom__sep">•</span>
+        <a href="/did-builder-showcase-staging/terms/">Terms of Use</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+      </footer>
+    </div>
+
+    
+  <script src="/did-builder-showcase-staging/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr.min.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-store.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+  
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  
+    <script src="/did-builder-showcase-staging/assets/js/mermaid-init.js"></script>
+  
+
+
+  </body>
+</html>

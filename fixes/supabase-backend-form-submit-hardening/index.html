@@ -1,0 +1,885 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.27.1 by Michael Rose
+  Copyright 2013-2025 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Fixing and Hardening a Submission Intake Pipeline Using Supabase - DataInsideData™ Staging</title>
+<meta name="description" content="A real debugging and hardening log covering frontend preview, backend validation, duplicate checks, IP hash metadata, Deno typing issues, and Supabase Edge Function deployment.">
+
+
+  <meta name="author" content="Fari Lindo">
+  
+  <meta property="article:author" content="Fari Lindo">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="DataInsideData™ Staging">
+<meta property="og:title" content="Fixing and Hardening a Submission Intake Pipeline Using Supabase">
+<meta property="og:url" content="https://dataeden.github.io/did-builder-showcase-staging/fixes/supabase-backend-form-submit-hardening/">
+
+
+  <meta property="og:description" content="A real debugging and hardening log covering frontend preview, backend validation, duplicate checks, IP hash metadata, Deno typing issues, and Supabase Edge Function deployment.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2026-08-01T11:30:50+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="https://dataeden.github.io/did-builder-showcase-staging/fixes/supabase-backend-form-submit-hardening/">
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/did-builder-showcase-staging/feed.xml" type="application/atom+xml" rel="alternate" title="DataInsideData™ Staging Feed">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+  
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/did-builder-showcase-staging/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css"></noscript>
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/did-builder-showcase-staging/assets/images/imgs/apple-touch-icon-180.png">
+
+<link rel="icon" type="image/png" href="/did-builder-showcase-staging/assets/images/imgs/site-icon-512.png">
+
+<link rel="icon" type="image/x-icon" href="/did-builder-showcase-staging/assets/images/imgs/favicon.ico">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/did-builder-showcase-staging/assets/images/imgs/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/did-builder-showcase-staging/assets/images/imgs/favicon-16.png">
+
+
+  </head>
+
+  <body class="layout--single" dir="ltr">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/did-builder-showcase-staging/"><img src="/did-builder-showcase-staging/assets/images/logos/FuturisticBrand.png" alt="DataInsideData™ Staging"></a>
+        
+        <a class="site-title" href="/did-builder-showcase-staging/">
+          DataInsideData™ Staging
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/"
+                
+                
+              >Start Here</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/blog/"
+                
+                
+              >Posts</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/projects/"
+                
+                
+              >Projects</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/how-tos/"
+                
+                
+              >How Tos</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/fixes/"
+                
+                
+              >Fixes</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/about/"
+                
+                
+              >About</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/contact/"
+                
+                
+              >Contact</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+    
+      <nav class="nav__list">
+  
+  <input id="ac-toc" name="accordion-toc" type="checkbox" />
+  <label for="ac-toc">Toggle Menu</label>
+  <ul class="nav__items">
+    
+      
+      
+        <li>
+          
+            <a href="/did-builder-showcase-staging/fixes/conda/"><span class="nav__sub-title">Conda</span></a>
+          
+
+          
+        </li>
+      
+        <li>
+          
+            <a href="/did-builder-showcase-staging/fixes/database-systems/"><span class="nav__sub-title">Database Systems</span></a>
+          
+
+          
+        </li>
+      
+        <li>
+          
+            <a href="/did-builder-showcase-staging/fixes/jekyll/"><span class="nav__sub-title">Jekyll</span></a>
+          
+
+          
+        </li>
+      
+        <li>
+          
+            <a href="/did-builder-showcase-staging/fixes/python/"><span class="nav__sub-title">Python</span></a>
+          
+
+          
+        </li>
+      
+    
+  </ul>
+</nav>
+
+    
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Fixing and Hardening a Submission Intake Pipeline Using Supabase">
+    <meta itemprop="description" content="A real debugging and hardening log covering frontend preview, backend validation, duplicate checks, IP hash metadata, Deno typing issues, and Supabase Edge Function deployment.">
+    <meta itemprop="datePublished" content="2026-08-01T11:30:50+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">
+            <a href="https://dataeden.github.io/did-builder-showcase-staging/fixes/supabase-backend-form-submit-hardening/" itemprop="url">Fixing and Hardening a Submission Intake Pipeline Using Supabase
+</a>
+          </h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          6 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-database"></i> Technical Breakdown</h4></header>
+              <ul class="toc__menu"><li><a href="#the-form-submission-worked">The Form Submission Worked</a><ul><li><a href="#the-make-edits-button-stranded-the-user-at-the-footer">The Make Edits button stranded the user at the footer</a></li><li><a href="#the-preview-panel-alignment-and-overflow-issues">The Preview Panel Alignment and Overflow Issues</a></li></ul></li><li><a href="#frontend-validation-was-tightened">Frontend validation was tightened</a></li><li><a href="#backend-validation-became-the-real-gate">Backend validation became the real gate</a></li><li><a href="#supabase-cli-deployment-login">Supabase CLI Deployment Login</a></li><li><a href="#denosupabase-typing-threw-a-never-error">Deno/Supabase typing threw a never error</a></li><li><a href="#anti-spam-balancing">Anti-spam Balancing</a></li><li><a href="#duplicate-submission-check-was-added">Duplicate submission check was added</a><ul><li><a href="#frontend-cooldown-stays-light">Frontend cooldown stays light</a></li><li><a href="#ip-hash-logging-was-added-carefully">IP hash logging was added carefully</a></li></ul></li><li><a href="#test-results">Test results</a></li><li><a href="#final-takeaway">Final Takeaway</a></li></ul>
+            </nav>
+          </aside>
+        
+        <blockquote>
+  <p>This fix note captures the Phase 3 hardening work for the <strong>DataInsideData™ Builder Showcase</strong> intake pipeline.</p>
+</blockquote>
+
+<p>By this point, the core system already worked:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit form
+    ↓
+Supabase Edge Function
+    ↓
+builder_project_submissions
+    ↓
+review queue
+    ↓
+promote into builder_projects
+    ↓
+export to YAML
+    ↓
+generate project detail page
+    ↓
+render on DataInsideData™
+</code></pre></div></div>
+
+<p>Phase 3 was about making that system safer and smoother.</p>
+
+<p>This is where things got interestingly granular:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>frontend preview-before-submit
+backend validation
+checkbox acknowledgements
+honeypot
+metadata logging
+IP hash with salt
+duplicate detection
+Deno type checking
+Supabase CLI deploy
+</code></pre></div></div>
+
+<blockquote>
+  <p>This post is written as a debugging and engineering note for anyone building a similar static-site-to-Supabase intake workflow.</p>
+</blockquote>
+
+<h2 id="the-form-submission-worked">The Form Submission Worked</h2>
+
+<p>The form could submit successfully.</p>
+
+<p>But there was additional tasks that needed addressing</p>
+
+<p>Specifically, form preview and make edits buttons:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>What if the user misspells the title?
+What if the repo URL is wrong?
+What if the tags are messy?
+What if the README URL is long and hard to review?
+</code></pre></div></div>
+
+<p>This preview step flow became:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fill form
+    ↓
+preview cleaned submission
+    ↓
+make edits or confirm
+    ↓
+submit to Supabase
+</code></pre></div></div>
+
+<p>This is less like a raw HTML form and more like an intentional intake workflow.</p>
+
+<p>
+That changed the feel of the form immediately, but presented small issues that if not addressed, breaks the UX flow and undermines the intake workflow.
+</p>
+
+<h3 id="the-make-edits-button-stranded-the-user-at-the-footer">The Make Edits button stranded the user at the footer</h3>
+
+<p>After adding preview, the <strong>Make Edits</strong> button worked, but it left the user near the bottom of the page.</p>
+
+<p>This was an obvious UX problem.</p>
+
+<p>The fix was to scroll focus back to the top of the form.</p>
+
+<p>Example snippet of the javascript that accomplished this:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span><span class="nx">editButton</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">editButton</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">"</span><span class="s2">click</span><span class="dl">"</span><span class="p">,</span> <span class="nf">function </span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">previewPanel</span><span class="p">.</span><span class="nx">hidden</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="nx">pendingPayload</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+    <span class="nx">status</span><span class="p">.</span><span class="nx">textContent</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Make your edits, then preview again.</span><span class="dl">"</span><span class="p">;</span>
+
+    <span class="kd">const</span> <span class="nx">firstField</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">first_name</span><span class="dl">"</span><span class="p">);</span>
+
+    <span class="nx">form</span><span class="p">.</span><span class="nf">scrollIntoView</span><span class="p">({</span>
+      <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">smooth</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">block</span><span class="p">:</span> <span class="dl">"</span><span class="s2">start</span><span class="dl">"</span>
+    <span class="p">});</span>
+
+   <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This small fix was a big UX win, making the intake workflow a seamless User experience.</p>
+
+<h3 id="the-preview-panel-alignment-and-overflow-issues">The Preview Panel Alignment and Overflow Issues</h3>
+
+<p>The preview panel looked good, but:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>long README URLs spilled outside the box
+Confirmed values looked slightly misaligned
+Make Edits button was too faint
+Confirm &amp; Submit was not left-positioned as desired
+</code></pre></div></div>
+
+<p>The fix was a grid layout using <code class="language-plaintext highlighter-rouge">custom.scss</code>:</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.did-builder-preview-row</span> <span class="p">{</span>
+  <span class="nl">display</span><span class="p">:</span> <span class="nb">grid</span><span class="p">;</span>
+  <span class="nl">grid-template-columns</span><span class="p">:</span> <span class="m">220px</span> <span class="nf">minmax</span><span class="p">(</span><span class="m">0</span><span class="o">,</span> <span class="m">1fr</span><span class="p">);</span>
+  <span class="nl">column-gap</span><span class="p">:</span> <span class="m">1</span><span class="mi">.25rem</span><span class="p">;</span>
+  <span class="nl">align-items</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+  <span class="nl">padding</span><span class="p">:</span> <span class="m">1</span><span class="mi">.1rem</span> <span class="m">0</span><span class="p">;</span>
+  <span class="nl">border-bottom</span><span class="p">:</span> <span class="m">1px</span> <span class="nb">solid</span> <span class="mh">#e5e7eb</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.did-builder-preview-row</span> <span class="nt">dd</span> <span class="p">{</span>
+  <span class="nl">margin</span><span class="p">:</span> <span class="m">0</span><span class="p">;</span>
+  <span class="nl">line-height</span><span class="p">:</span> <span class="m">1</span><span class="mi">.35</span><span class="p">;</span>
+  <span class="nl">align-self</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>
+  <span class="nl">min-width</span><span class="p">:</span> <span class="m">0</span><span class="p">;</span>
+  <span class="nl">overflow-wrap</span><span class="p">:</span> <span class="n">anywhere</span><span class="p">;</span>
+  <span class="nl">word-break</span><span class="p">:</span> <span class="n">break-word</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The important piece was:</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">grid-template-columns</span><span class="p">:</span> <span class="m">220px</span> <span class="nf">minmax</span><span class="p">(</span><span class="m">0</span><span class="o">,</span> <span class="m">1fr</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>This <code class="language-plaintext highlighter-rouge">minmax(0, 1fr)</code> is what lets long values shrink and wrap correctly.</p>
+
+<h2 id="frontend-validation-was-tightened">Frontend validation was tightened</h2>
+
+<p>The frontend now checks:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>required fields
+category selection
+tags/tools present
+GitHub repo URL shape
+public showcase acknowledgement
+</code></pre></div></div>
+
+<p>But the key principle stayed the same:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Frontend validation helps the user.
+Backend validation protects the system.
+</code></pre></div></div>
+
+<h2 id="backend-validation-became-the-real-gate">Backend validation became the real gate</h2>
+
+<p>The Edge Function validates:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>first name
+last name
+email
+GitHub repo URL
+project title
+project category
+project description
+tags/tools
+checkbox acknowledgements
+field lengths
+honeypot
+</code></pre></div></div>
+
+<p>The backend system is now much more secure.</p>
+
+<p>This caught bad payloads even when someone tried to bypass the browser.</p>
+
+<h2 id="supabase-cli-deployment-login">Supabase CLI Deployment Login</h2>
+
+<p>When deploying supabase function using <code class="language-plaintext highlighter-rouge">npx</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx supabase functions deploy builder-project
+</code></pre></div></div>
+
+<p>the CLI returned:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Access token not provided.
+Supply an access token by running supabase login or setting the SUPABASE_ACCESS_TOKEN environment variable.
+</code></pre></div></div>
+
+<p>So the Issue was a missing token from the working environment.</p>
+
+<p>The fix was logging into supabase using:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx supabase login
+</code></pre></div></div>
+
+<p>That opened the browser and also left a <code class="language-plaintext highlighter-rouge">url link</code> in the terminal.</p>
+
+<ul>
+  <li>Copy / paste <code class="language-plaintext highlighter-rouge">url link</code> into browser if default browser doesn’t open automatically.</li>
+</ul>
+
+<p>After login, the CLI allowed project selection and deployment:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx supabase functions deploy builder-project
+</code></pre></div></div>
+
+<p>That was a good reminder:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The browser-facing publishable key is not the Supabase CLI access token.
+</code></pre></div></div>
+
+<p>Different keys, different jobs.</p>
+
+<h2 id="denosupabase-typing-threw-a-never-error">Deno/Supabase typing threw a <code class="language-plaintext highlighter-rouge">never</code> error</h2>
+
+<p>After adding duplicate checks, TypeScript complained:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Type '"public"' is not assignable to type 'never'.
+</code></pre></div></div>
+
+<p>This came from Supabase client typing.</p>
+
+<p>The helper signature used:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">ReturnType</span><span class="o">&lt;</span><span class="k">typeof</span> <span class="nx">createClient</span><span class="o">&gt;</span>
+</code></pre></div></div>
+
+<p>Without generated database types, Supabase could infer table names too narrowly.</p>
+
+<p>The fix was to type the client more loosely:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">createClient</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">npm:@supabase/supabase-js@2</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">import</span> <span class="kd">type</span> <span class="p">{</span> <span class="nx">SupabaseClient</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">npm:@supabase/supabase-js@2</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="kd">type</span> <span class="nx">SupabaseAdminClient</span> <span class="o">=</span> <span class="nx">SupabaseClient</span><span class="o">&lt;</span><span class="kr">any</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Then:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="kd">function</span> <span class="nf">checkDuplicateSubmission</span><span class="p">(</span>
+  <span class="nx">supabaseAdmin</span><span class="p">:</span> <span class="nx">SupabaseAdminClient</span><span class="p">,</span>
+  <span class="nx">payload</span><span class="p">:</span> <span class="nx">BuilderProjectPayload</span>
+<span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">DuplicateCheckResult</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="c1">// duplicate logic</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">supabaseAdmin</span> <span class="o">=</span> <span class="nx">createClient</span><span class="o">&lt;</span><span class="kr">any</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">supabaseUrl</span><span class="p">,</span> <span class="nx">writeKey</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>This was another good win, clearing the type error while keeping the function readable.</p>
+
+<h2 id="anti-spam-balancing">Anti-spam Balancing</h2>
+
+<p>The anti-spam needed to protect builders, not punish them</p>
+
+<p>The first idea was a bit too heavy-handed:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>same email in last 10 minutes → block
+same repo URL in last 10 minutes → block
+same IP hash in last 10 minutes → block
+</code></pre></div></div>
+
+<p>Why?</p>
+
+<ul>
+  <li>Productive builders may submit multiple projects</li>
+  <li>Monorepos exist</li>
+  <li>One repo can hold many projects</li>
+</ul>
+
+<p>So the more balanced logic became:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>same actual project evidence → block
+same person submitting multiple projects → allow
+</code></pre></div></div>
+
+<p>This makes for a more elegant approach.</p>
+
+<h2 id="duplicate-submission-check-was-added">Duplicate submission check was added</h2>
+
+<p>The duplicate function checks:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>active README URL duplicate
+recent exact duplicate by email + repo + title
+</code></pre></div></div>
+
+<p>
+It returns <strong>409 Conflict</strong> when the submission conflicts with an existing/recent submission.
+
+That is better than <strong>429 Too Many Requests</strong>, because this is not just a rate problem.
+
+It is a duplicate/conflict problem.
+</p>
+
+<h3 id="frontend-cooldown-stays-light">Frontend cooldown stays light</h3>
+
+<p>The frontend gets a simple local cooldown:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>same browser
+successful submit
+wait about 60 seconds before another submit
+</code></pre></div></div>
+
+<ul>
+  <li>This helps prevent accidental rapid resubmits</li>
+  <li>But the real protection still lives in the backend</li>
+  <li>Frontend cooldown is UX</li>
+  <li>Backend checks are enforcement</li>
+</ul>
+
+<h3 id="ip-hash-logging-was-added-carefully">IP hash logging was added carefully</h3>
+
+<p>Instead of storing raw IP addresses, the system stores a salted hash.</p>
+
+<p>That means the system can detect repeated request patterns later without casually storing the plain IP.</p>
+
+<p>The helper:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="kd">function</span> <span class="nf">getClientIpHash</span><span class="p">(</span><span class="nx">req</span><span class="p">:</span> <span class="nx">Request</span><span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">ip</span> <span class="o">=</span> <span class="nf">getClientIp</span><span class="p">(</span><span class="nx">req</span><span class="p">);</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">ip</span><span class="p">)</span> <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+
+  <span class="kd">const</span> <span class="nx">salt</span> <span class="o">=</span> <span class="nx">Deno</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">DID_IP_HASH_SALT</span><span class="dl">"</span><span class="p">);</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">salt</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nf">warn</span><span class="p">(</span><span class="dl">"</span><span class="s2">DID_IP_HASH_SALT is not set. Skipping IP hash.</span><span class="dl">"</span><span class="p">);</span>
+    <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="k">await</span> <span class="nf">sha256Hex</span><span class="p">(</span><span class="s2">`</span><span class="p">${</span><span class="nx">salt</span><span class="p">}</span><span class="s2">:</span><span class="p">${</span><span class="nx">ip</span><span class="p">}</span><span class="s2">`</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The salt is stored as a Supabase secret:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx supabase secrets <span class="nb">set </span><span class="nv">DID_IP_HASH_SALT</span><span class="o">=</span><span class="s2">"PASTE_RANDOM_HEX_STRING_HERE"</span>
+</code></pre></div></div>
+
+<p>This is separate from:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DID_SUPABASE_WRITE_KEY
+DID_PUBLIC_FORM_KEY
+SUPABASE_URL
+</code></pre></div></div>
+
+<p>Each secret serves a different role.</p>
+
+<h2 id="test-results">Test results</h2>
+
+<p>The hardening implementation was tested against the following, among other targets:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>valid form
+unchecked ownership
+unchecked showcase acknowledgement
+blank category
+blank tags/tools
+bad repo URLL
+duplicate same email + repo + title
+productive same-email multi-project scenario
+</code></pre></div></div>
+
+<p>The successful behavior:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>valid form → succeeds
+bad required fields → fail
+bad repo URL → fail
+same exact project → blocked
+different project from same builder → allowed
+</code></pre></div></div>
+
+<p>That became the right balance for this phase.</p>
+
+<h2 id="final-takeaway">Final Takeaway</h2>
+
+<p>This phase clarified the real job of hardening.</p>
+
+<p>Hardening is not just blocking things.</p>
+
+<p>Hardening is designing the rules so the right people can still do the right work.</p>
+
+<p>For this system, the goal is:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>block spam
+block duplicates
+protect the database
+preserve trust
+encourage productive builders
+</code></pre></div></div>
+
+<p>That is why the duplicate logic is based on project evidence, not simply email, repo, or IP.</p>
+
+<p>And that is the difference between a form that technically works and an intake system that is starting to behave like a real product.</p>
+
+<hr />
+
+<p><em>Data Inside Data™</em>.</p>
+
+<p><em>Tech Hands, a Science Mind, and a Heart for Community</em>.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2026-08-01T11:30:50+00:00">August 1, 2026</time></p>
+
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/did-builder-showcase-staging/fixes/python-eol-conda-migration-fix/" class="pagination--pager" title="Migrating an End-of-Life Python Kernel (3.8 / 3.9 → 3.10+)">Previous</a>
+    
+    
+      <a href="/did-builder-showcase-staging/fixes/tech-fix-jekyll-url-stability-redirects/" class="pagination--pager" title="Jekyll URL Stability &amp; Redirects: Fixing Stale Paths After Renaming Posts">Next</a>
+    
+  </nav>
+
+
+    </div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+      
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <footer class="page__footer" role="contentinfo">
+  <div class="page__footer-inner">
+    <div class="page__footer-grid">
+
+      <!-- LEFT: Title + email + quick links -->
+      <div class="page__footer-col">
+        <h2 class="page__footer-title">DataInsideData™ Staging</h2>
+
+        
+          <p class="page__footer-email">
+            <a href="mailto:contact@datainsidedata.com">contact@datainsidedata.com</a>
+          </p>
+        
+
+    <ul class="page__footer-quicklinks">
+     
+    <li>
+      <a href="/did-builder-showcase-staging/archive/">Archive</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/sitemap.xml">Sitemap</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/feed.xml">RSS</a>
+    </li>
+        
+     </ul>
+
+      </div>
+
+      <!-- MIDDLE: Social links (MM style) -->
+      <div class="page__footer-col">
+        <div class="page__footer-follow">
+          <ul class="social-icons">
+            
+              
+                
+                  <li>
+                    <a href="https://github.com/dataeden" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-github" aria-hidden="true"></i>
+                      <span class="label">GitHub</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="mailto:contact@datainsidedata.com" rel="nofollow noopener noreferrer">
+                      <i class="fas fa-fw fa-envelope" aria-hidden="true"></i>
+                      <span class="label">Email</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="https://www.linkedin.com/" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-linkedin" aria-hidden="true"></i>
+                      <span class="label">LinkedIn</span>
+                    </a>
+                  </li>
+                
+              
+            
+
+            
+              <li>
+                <a href="/did-builder-showcase-staging/feed.xml">
+                  <i class="fas fa-fw fa-rss-square" aria-hidden="true"></i>
+                  <span class="label">Feed</span>
+                </a>
+              </li>
+            
+          </ul>
+        </div>
+      </div>
+
+      <!-- RIGHT: Description -->
+      <div class="page__footer-col">
+        
+          <p class="page__footer-desc">Staging preview for DataInsideData™ and Builder Showcase testing.</p>
+        
+      </div>
+
+    </div>
+
+    <!-- Footer bottom bar (your DID style) -->
+    <div class="footer-bottom">
+      <p class="footer-bottom__copyright">
+        © 2026 Data Inside Data™. All rights reserved.
+      </p>
+
+      <p class="footer-bottom__powered">
+        Powered by
+        <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>,
+        <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a>, and
+        <a href="https://aws.amazon.com/route53/" target="_blank" rel="noopener">AWS Route 53</a>.
+      </p>
+
+      <p class="footer-bottom__legal">
+        <a href="/did-builder-showcase-staging/privacy/">Privacy Policy</a>
+        <span class="footer-bottom__sep">•</span>
+        <a href="/did-builder-showcase-staging/terms/">Terms of Use</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+      </footer>
+    </div>
+
+    
+  <script src="/did-builder-showcase-staging/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr.min.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-store.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+  
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  
+    <script src="/did-builder-showcase-staging/assets/js/mermaid-init.js"></script>
+  
+
+
+  </body>
+</html>

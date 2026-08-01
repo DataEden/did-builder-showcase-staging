@@ -1,0 +1,809 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.27.1 by Michael Rose
+  Copyright 2013-2025 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>How to Build a Jekyll Blog in Less Than 15 Minutes - DataInsideData™ Staging</title>
+<meta name="description" content="A beginner-friendly guide…">
+
+
+  <meta name="author" content="Fari Lindo">
+  
+  <meta property="article:author" content="Fari Lindo">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="DataInsideData™ Staging">
+<meta property="og:title" content="How to Build a Jekyll Blog in Less Than 15 Minutes">
+<meta property="og:url" content="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/11/first-did-post-jekyll-build-intro/">
+
+
+  <meta property="og:description" content="A beginner-friendly guide…">
+
+
+
+  <meta property="og:image" content="https://dataeden.github.io/did-builder-showcase-staging/assets/images/thumbs/site-wide-archive-post-thumb.png">
+
+
+
+
+
+  <meta property="article:published_time" content="2026-01-11T17:00:00+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/11/first-did-post-jekyll-build-intro/">
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/did-builder-showcase-staging/feed.xml" type="application/atom+xml" rel="alternate" title="DataInsideData™ Staging Feed">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+  
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/did-builder-showcase-staging/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css"></noscript>
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/did-builder-showcase-staging/assets/images/imgs/apple-touch-icon-180.png">
+
+<link rel="icon" type="image/png" href="/did-builder-showcase-staging/assets/images/imgs/site-icon-512.png">
+
+<link rel="icon" type="image/x-icon" href="/did-builder-showcase-staging/assets/images/imgs/favicon.ico">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/did-builder-showcase-staging/assets/images/imgs/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/did-builder-showcase-staging/assets/images/imgs/favicon-16.png">
+
+
+  </head>
+
+  <body class="layout--single" dir="ltr">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/did-builder-showcase-staging/"><img src="/did-builder-showcase-staging/assets/images/logos/FuturisticBrand.png" alt="DataInsideData™ Staging"></a>
+        
+        <a class="site-title" href="/did-builder-showcase-staging/">
+          DataInsideData™ Staging
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/"
+                
+                
+              >Start Here</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/blog/"
+                
+                
+              >Posts</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/projects/"
+                
+                
+              >Projects</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/how-tos/"
+                
+                
+              >How Tos</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/fixes/"
+                
+                
+              >Fixes</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/about/"
+                
+                
+              >About</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/contact/"
+                
+                
+              >Contact</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+  
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="How to Build a Jekyll Blog in Less Than 15 Minutes">
+    <meta itemprop="description" content="A beginner-friendly guide…">
+    <meta itemprop="datePublished" content="2026-01-11T17:00:00+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">
+            <a href="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/11/first-did-post-jekyll-build-intro/" itemprop="url">How to Build a Jekyll Blog in Less Than 15 Minutes
+</a>
+          </h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2026-01-11T17:00:00+00:00">January 11, 2026</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          2 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> Post Outline</h4></header>
+              <ul class="toc__menu"><li><a href="#a-beginner-friendly-jekyll-tutorial-for-those-interested-in">A Beginner-Friendly Jekyll Tutorial for Those Interested in</a></li><li><a href="#these-are-the-first-steps-before-you-actually-begin-building-your-awesome-site">These are the first steps before you actually begin building your awesome site</a><ul><li><a href="#installing-jekyll">Installing jekyll</a></li><li><a href="#congratulations-on-installing-ruby-and-jekyll-you-are-now-ready-to-create-your-blog">Congratulations on installing Ruby and Jekyll, you are now ready to create your blog🤓😎</a></li><li><a href="#after-installing-the-jekyll">After installing the jekyll</a></li><li><a href="#create-new-jekyll-site-at-myblog-by-running-this-command">Create new jekyll site at ./myblog by running this command</a></li><li><a href="#change-directory-to-myblog-thusly">Change directory to /myblog thusly</a></li><li><a href="#build-the-site-and-make-it-available-on-your-local-server">Build the site and make it available on your local server</a></li><li><a href="#now-browse-to-the-following-local-web-address-provided">Now browse to the following local web-address provided</a></li></ul></li></ul>
+            </nav>
+          </aside>
+        
+        <blockquote>
+  <p><strong>Series note:</strong><br />
+This post covers the fastest possible path from zero to a running Jekyll site.<br />
+In the next post, I’ll show how I improved this scaffold with better structure, styling, and a production-ready workflow.</p>
+</blockquote>
+
+<h2 id="a-beginner-friendly-jekyll-tutorial-for-those-interested-in">A Beginner-Friendly Jekyll Tutorial for Those Interested in</h2>
+
+<ul>
+  <li>learning how to design websites/blogs.</li>
+  <li>Building a site for work.</li>
+  <li>Building a living portfolio to showcase your evolving projects, professional development, etc.</li>
+  <li>Creating a testing/learning environment in order to practice HTML, CSS, JS, etc.</li>
+  <li>Practicing by implementing DevSecOps/DevOps concepts and methods in a real world development/production environment.</li>
+  <li>Or anything else that demonstrates your hands on technical knowledge.</li>
+</ul>
+
+<blockquote>
+  <p>Note: This tutorial is specifically For Windows Users. We’ll have an equivalent MacOS version in an upcoming post.</p>
+</blockquote>
+
+<h2 id="these-are-the-first-steps-before-you-actually-begin-building-your-awesome-site">These are the first steps before you actually begin building your awesome site</h2>
+
+<h3 id="installing-jekyll">Installing jekyll</h3>
+
+<p>✔ Step 1</p>
+
+<ul>
+  <li>navigate to <a href="https://rubyinstaller.org/downloads/">RubyInstaller Downloads</a></li>
+  <li>if you’re not sure about which version to use or new to jekyll?
+    <ul>
+      <li>jekyll recommends using Ruby+Devkit 3.4.X (x64) installer.</li>
+      <li>this version has the
+        <blockquote>
+          <p>largest number of compatible gems and installs the MSYS2 Devkit alongside RUBY, so gems with C-extensions can be compiled immediately.</p>
+        </blockquote>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>✔ Step 2</p>
+
+<ul>
+  <li>use selected default options for installation</li>
+  <li>after installation finishes
+    <ul>
+      <li>click finish and the installer will automatically install the other dependencies</li>
+      <li>this happens because of the <strong>checked [✔️])</strong> check box on the installation wizard.
+        <ul>
+          <li>this executes/runs</li>
+        </ul>
+      </li>
+    </ul>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> ridk <span class="nb">install</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>and is needed for installing gems with native extnesions.</li>
+      <li>additional documentation can be found here <a href="https://rubyinstaller.org/downloads/">RubyInstaller Documentation</a>
+        <ul>
+          <li>From the options list, choose <strong>3</strong>, <code class="language-plaintext highlighter-rouge">MSYS2 and MINGW development toolchain</code></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>We need to open up the powershell (ps) command line interface (CLI) or command prompt (cmd), so we can check if the application has been installed correctly.</li>
+  <li>
+    <p>Simply click then type into the search tool located on the bottom task bar.</p>
+  </li>
+  <li>
+    <p><strong>Open Windows Search Tool</strong>:
+<img src="/assets/images/imgs/search_tool_in_windows_bottowm_task_bar.png" alt="Windows Search icon" /></p>
+  </li>
+  <li>Now let’s check if Ruby has been installed correctly by running.</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ruby <span class="nt">--version</span>
+</code></pre></div></div>
+
+<ul>
+  <li>you should see something similar to this:</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ruby 3.4.8 <span class="o">(</span>2025-12-17 revision 995b59f666<span class="o">)</span> + PRISM <span class="o">[</span>x64-mingw-ucrt]
+</code></pre></div></div>
+
+<p>✔ Step 3</p>
+
+<ul>
+  <li>close out the terminal window and reopen so changes to the <code class="language-plaintext highlighter-rouge">PATH</code> environmemt are reflected.</li>
+  <li>Install Jekyll and Bundler using</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem intall jekyll bundler
+</code></pre></div></div>
+
+<p>✔ Step 4</p>
+
+<ul>
+  <li>Now let’s check if Jekyll has been installed correctly by running this command</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll <span class="nt">-v</span>
+</code></pre></div></div>
+
+<p>✔ Step 5</p>
+
+<ul>
+  <li>If you want to update Jekyll for any reason, run the following command, for example to update your installation (remove brackets)</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem update <span class="nt">--system</span> <span class="o">[</span> add version number here] 
+</code></pre></div></div>
+
+<h3 id="congratulations-on-installing-ruby-and-jekyll-you-are-now-ready-to-create-your-blog">Congratulations on installing Ruby and Jekyll, you are now ready to create your blog🤓😎</h3>
+
+<ul>
+  <li>This section shows how to create a simple blog upon which you can then build your preferred awesome site.</li>
+</ul>
+
+<h3 id="after-installing-the-jekyll">After installing the jekyll</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem intall jekyll bundler
+</code></pre></div></div>
+
+<h3 id="create-new-jekyll-site-at-myblog-by-running-this-command">Create new jekyll site at ./myblog by running this command</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll new myblog
+</code></pre></div></div>
+
+<h3 id="change-directory-to-myblog-thusly">Change directory to /myblog thusly</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>myblog
+</code></pre></div></div>
+
+<h3 id="build-the-site-and-make-it-available-on-your-local-server">Build the site and make it available on your local server</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle <span class="nb">exec </span>jekyll serve
+</code></pre></div></div>
+
+<h3 id="now-browse-to-the-following-local-web-address-provided">Now browse to the following local web-address provided</h3>
+
+<p><code class="language-plaintext highlighter-rouge">http://localhost:4000</code> or something similar , by holding down <code class="language-plaintext highlighter-rouge">ctrl</code> on the keyboard and clicking the link to open the page in your <code class="language-plaintext highlighter-rouge">default</code> browser.</p>
+
+<ul>
+  <li>Or by copying the link and pasting it into your browser.</li>
+</ul>
+
+<p>This tutorial is based on the <em><a href="https://jekyllrb.com/docs/installation/windows/">Full Jekyll Documentation</a>.</em></p>
+
+<blockquote>
+  <p>Presented by <a href="https://www.datainsidedata.com">DataInsideData</a>™ - Tech Hands, A Science Mind, and a Heart for community™.</p>
+</blockquote>
+
+<hr />
+
+<p><em>Data Inside Data™</em>.</p>
+
+<p><em>Tech Hands, a Science Mind, and a Heart for Community</em>.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2026-01-11T17:00:00+00:00">January 11, 2026</time></p>
+
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/did-builder-showcase-staging/blog/2026/01/02/from-zero-to-live-jekyll-blog/" class="pagination--pager" title="From Zero to Live: Setting Up My Jekyll Blog with GitHub Pages and AWS Route 53">Previous</a>
+    
+    
+      <a href="/did-builder-showcase-staging/blog/2026/01/19/Why-a-Jekyll-DevOps-Aware-website/" class="pagination--pager" title="Why Jekyll Is a Top Choice for a DevOps-Aware Business Website">Next</a>
+    
+  </nav>
+
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    
+<div class="page__related">
+  
+  <h2 class="page__related-title">You May Also Enjoy</h2>
+  <div class="grid__wrapper">
+    
+      
+      
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/did-builder-showcase-staging/assets/images/thumbs/site-wide-archive-post-thumb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/did-builder-showcase-staging/blog/2026/06/10/supabase-edge-function-intake-hardening/" rel="permalink">Hardening a Supabase Edge Function Intake Form with Validation, Preview, Honeypot, and Duplicate Checks
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2026-06-10T17:00:00+00:00">June 10, 2026</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          5 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">A practical beginner-to-pro guide for hardening a static-site intake form backed by Supabase Edge Functions and Postgres.
+</p>
+  </article>
+</div>
+
+    
+      
+      
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/did-builder-showcase-staging/assets/images/thumbs/site-wide-archive-post-thumb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/did-builder-showcase-staging/blog/2026/04/26/financial-intelligence-lab-dashboard/" rel="permalink">From Notebooks to a Financial Intelligence Dashboard
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2026-04-26T17:00:00+00:00">April 26, 2026</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          3 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">How I transformed raw portfolio tracking into a tested analytics pipeline, AI-powered reporting system, and interactive Streamlit dashboard.
+</p>
+  </article>
+</div>
+
+    
+      
+      
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/did-builder-showcase-staging/assets/images/thumbs/site-wide-archive-post-thumb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/did-builder-showcase-staging/blog/2026/03/24/did-financial-intelligence-lab/" rel="permalink">Financial Intelligence Lab — What I’m Learning From My First Few Days Investing
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2026-03-24T17:00:00+00:00">March 24, 2026</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          3 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">A beginner-friendly breakdown of what I’ve learned from my first few days building a structured investment tracking system — from sector behavior to dividend...</p>
+  </article>
+</div>
+
+    
+      
+      
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/did-builder-showcase-staging/assets/images/thumbs/site-wide-archive-post-thumb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/did-builder-showcase-staging/blog/2026/01/26/did-Minima-to-minimal-mistakes-migration/" rel="permalink">Migrating from Minima to Minimal Mistakes (MM) — A Clean Approach
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+        <time datetime="2026-01-26T17:00:00+00:00">January 26, 2026</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          6 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">A step-by-step migration guide from Minima to Minimal Mistakes, including config, overrides, navigation, projects collections, and footer fixes.
+</p>
+  </article>
+</div>
+
+    
+  </div>
+</div>
+
+  
+  
+</div>
+
+      
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <footer class="page__footer" role="contentinfo">
+  <div class="page__footer-inner">
+    <div class="page__footer-grid">
+
+      <!-- LEFT: Title + email + quick links -->
+      <div class="page__footer-col">
+        <h2 class="page__footer-title">DataInsideData™ Staging</h2>
+
+        
+          <p class="page__footer-email">
+            <a href="mailto:contact@datainsidedata.com">contact@datainsidedata.com</a>
+          </p>
+        
+
+    <ul class="page__footer-quicklinks">
+     
+    <li>
+      <a href="/did-builder-showcase-staging/archive/">Archive</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/sitemap.xml">Sitemap</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/feed.xml">RSS</a>
+    </li>
+        
+     </ul>
+
+      </div>
+
+      <!-- MIDDLE: Social links (MM style) -->
+      <div class="page__footer-col">
+        <div class="page__footer-follow">
+          <ul class="social-icons">
+            
+              
+                
+                  <li>
+                    <a href="https://github.com/dataeden" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-github" aria-hidden="true"></i>
+                      <span class="label">GitHub</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="mailto:contact@datainsidedata.com" rel="nofollow noopener noreferrer">
+                      <i class="fas fa-fw fa-envelope" aria-hidden="true"></i>
+                      <span class="label">Email</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="https://www.linkedin.com/" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-linkedin" aria-hidden="true"></i>
+                      <span class="label">LinkedIn</span>
+                    </a>
+                  </li>
+                
+              
+            
+
+            
+              <li>
+                <a href="/did-builder-showcase-staging/feed.xml">
+                  <i class="fas fa-fw fa-rss-square" aria-hidden="true"></i>
+                  <span class="label">Feed</span>
+                </a>
+              </li>
+            
+          </ul>
+        </div>
+      </div>
+
+      <!-- RIGHT: Description -->
+      <div class="page__footer-col">
+        
+          <p class="page__footer-desc">Staging preview for DataInsideData™ and Builder Showcase testing.</p>
+        
+      </div>
+
+    </div>
+
+    <!-- Footer bottom bar (your DID style) -->
+    <div class="footer-bottom">
+      <p class="footer-bottom__copyright">
+        © 2026 Data Inside Data™. All rights reserved.
+      </p>
+
+      <p class="footer-bottom__powered">
+        Powered by
+        <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>,
+        <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a>, and
+        <a href="https://aws.amazon.com/route53/" target="_blank" rel="noopener">AWS Route 53</a>.
+      </p>
+
+      <p class="footer-bottom__legal">
+        <a href="/did-builder-showcase-staging/privacy/">Privacy Policy</a>
+        <span class="footer-bottom__sep">•</span>
+        <a href="/did-builder-showcase-staging/terms/">Terms of Use</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+      </footer>
+    </div>
+
+    
+  <script src="/did-builder-showcase-staging/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr.min.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-store.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+  
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  
+    <script src="/did-builder-showcase-staging/assets/js/mermaid-init.js"></script>
+  
+
+
+  </body>
+</html>

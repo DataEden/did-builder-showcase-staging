@@ -1,0 +1,660 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.27.1 by Michael Rose
+  Copyright 2013-2025 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Installing GitHub CLI on Windows + Chocolatey Troubleshooting and Cleanup - DataInsideData™ Staging</title>
+<meta name="description" content="A practical Windows guide to cleaning up a partial Chocolatey install of GitHub CLI, reinstalling it cleanly, and authenticating with GitHub CLI.">
+
+
+  <meta name="author" content="Fari Lindo">
+  
+  <meta property="article:author" content="Fari Lindo">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="DataInsideData™ Staging">
+<meta property="og:title" content="Installing GitHub CLI on Windows + Chocolatey Troubleshooting and Cleanup">
+<meta property="og:url" content="https://dataeden.github.io/did-builder-showcase-staging/how-tos/installing-github-cli-windows-chocolatey-cleanup/">
+
+
+  <meta property="og:description" content="A practical Windows guide to cleaning up a partial Chocolatey install of GitHub CLI, reinstalling it cleanly, and authenticating with GitHub CLI.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2026-08-01T11:30:50+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="https://dataeden.github.io/did-builder-showcase-staging/how-tos/installing-github-cli-windows-chocolatey-cleanup/">
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/did-builder-showcase-staging/feed.xml" type="application/atom+xml" rel="alternate" title="DataInsideData™ Staging Feed">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+  
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/did-builder-showcase-staging/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css"></noscript>
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/did-builder-showcase-staging/assets/images/imgs/apple-touch-icon-180.png">
+
+<link rel="icon" type="image/png" href="/did-builder-showcase-staging/assets/images/imgs/site-icon-512.png">
+
+<link rel="icon" type="image/x-icon" href="/did-builder-showcase-staging/assets/images/imgs/favicon.ico">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/did-builder-showcase-staging/assets/images/imgs/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/did-builder-showcase-staging/assets/images/imgs/favicon-16.png">
+
+
+  </head>
+
+  <body class="layout--single" dir="ltr">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/did-builder-showcase-staging/"><img src="/did-builder-showcase-staging/assets/images/logos/FuturisticBrand.png" alt="DataInsideData™ Staging"></a>
+        
+        <a class="site-title" href="/did-builder-showcase-staging/">
+          DataInsideData™ Staging
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/"
+                
+                
+              >Start Here</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/blog/"
+                
+                
+              >Posts</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/projects/"
+                
+                
+              >Projects</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/how-tos/"
+                
+                
+              >How Tos</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/fixes/"
+                
+                
+              >Fixes</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/about/"
+                
+                
+              >About</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/contact/"
+                
+                
+              >Contact</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+    
+      <nav class="nav__list">
+  
+  <input id="ac-toc" name="accordion-toc" type="checkbox" />
+  <label for="ac-toc">Toggle Menu</label>
+  <ul class="nav__items">
+    
+      
+      
+    
+  </ul>
+</nav>
+
+    
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Installing GitHub CLI on Windows + Chocolatey Troubleshooting and Cleanup">
+    <meta itemprop="description" content="A practical Windows guide to cleaning up a partial Chocolatey install of GitHub CLI, reinstalling it cleanly, and authenticating with GitHub CLI.">
+    <meta itemprop="datePublished" content="2026-08-01T11:30:50+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">
+            <a href="https://dataeden.github.io/did-builder-showcase-staging/how-tos/installing-github-cli-windows-chocolatey-cleanup/" itemprop="url">Installing GitHub CLI on Windows + Chocolatey Troubleshooting and Cleanup
+</a>
+          </h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          3 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-layer-group"></i> Technical Breakdown</h4></header>
+              <ul class="toc__menu"><li><a href="#when-this-guide-is-useful">When this guide is useful</a></li><li><a href="#part-a--clean-up-the-partial-chocolatey-install">Part A — Clean up the partial Chocolatey install</a><ul><li><a href="#check-whether-gh-exists-anywhere">Check whether gh exists anywhere</a></li><li><a href="#check-the-chocolatey-lib-folder">Check the Chocolatey lib folder</a></li><li><a href="#check-the-chocolatey-bin-shims">Check the Chocolatey bin shims</a></li><li><a href="#restart-your-terminal">Restart your terminal</a></li></ul></li><li><a href="#part-b--install-github-cli-the-clean-way">Part B — Install GitHub CLI the clean way</a><ul><li><a href="#option-1--install-with-winget-recommended">Option 1 — Install with winget (recommended)</a></li><li><a href="#option-2--install-using-the-official-msi">Option 2 — Install using the official MSI</a></li></ul></li><li><a href="#part-c--authenticate-github-cli">Part C — Authenticate GitHub CLI</a><ul><li><a href="#why-this-authentication-step-matters">Why this authentication step matters</a></li></ul></li><li><a href="#part-d--confirm-authentication-status">Part D — Confirm authentication status</a></li><li><a href="#final-notes">Final Notes</a></li></ul>
+            </nav>
+          </aside>
+        
+        <blockquote>
+  <p>This guide walks through a clean installation of <strong>GitHub CLI (<code class="language-plaintext highlighter-rouge">gh</code>)</strong> on Windows, especially if an earlier Chocolatey-based install was interrupted or partially completed.</p>
+</blockquote>
+
+<p>If you started a <code class="language-plaintext highlighter-rouge">choco</code> install without administrator privileges and had to stop partway through, Chocolatey may have left behind a partial install state. This guide shows you how to clean that up safely, install GitHub CLI using a cleaner method, and authenticate it properly.</p>
+
+<h2 id="when-this-guide-is-useful">When this guide is useful</h2>
+
+<p>Use this guide if:</p>
+
+<ul>
+  <li>you attempted to install GitHub CLI with Chocolatey</li>
+  <li>the install failed or was interrupted</li>
+  <li>you were not running PowerShell as Administrator</li>
+  <li><code class="language-plaintext highlighter-rouge">gh</code> is now partially installed or behaving inconsistently</li>
+  <li>you want a cleaner install path using <code class="language-plaintext highlighter-rouge">winget</code> or the official installer</li>
+</ul>
+
+<h2 id="part-a--clean-up-the-partial-chocolatey-install">Part A — Clean up the partial Chocolatey install</h2>
+
+<p>If the install was aborted and exited abnormally, the goal is simply to remove any half-installed <code class="language-plaintext highlighter-rouge">gh</code> files before reinstalling.</p>
+
+<h3 id="check-whether-gh-exists-anywhere">Check whether <code class="language-plaintext highlighter-rouge">gh</code> exists anywhere</h3>
+
+<p>Open <strong>PowerShell</strong>. A normal session is fine for this check.</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">where</span><span class="w"> </span><span class="nx">gh</span><span class="w">
+</span></code></pre></div></div>
+
+<p>What to look for:</p>
+
+<ul>
+  <li>If nothing is returned, that is a good sign. Move on to <strong>Part B</strong>.</li>
+  <li>If a path is returned, make note of it. We will remove the leftover files next.</li>
+</ul>
+
+<h3 id="check-the-chocolatey-lib-folder">Check the Chocolatey <code class="language-plaintext highlighter-rouge">lib</code> folder</h3>
+
+<p>Run:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Get-ChildItem</span><span class="w"> </span><span class="nx">C:\ProgramData\chocolatey\lib</span><span class="w">
+</span></code></pre></div></div>
+
+<p>If you see a folder named <code class="language-plaintext highlighter-rouge">gh</code>, remove it with:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Remove-Item</span><span class="w"> </span><span class="nt">-Recurse</span><span class="w"> </span><span class="nt">-Force</span><span class="w"> </span><span class="nx">C:\ProgramData\chocolatey\lib\gh</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This clears the partially installed package files.</p>
+
+<h3 id="check-the-chocolatey-bin-shims">Check the Chocolatey <code class="language-plaintext highlighter-rouge">bin</code> shims</h3>
+
+<p>Run:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Get-ChildItem</span><span class="w"> </span><span class="nx">C:\ProgramData\chocolatey\bin</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">findstr</span><span class="w"> </span><span class="nx">gh</span><span class="w">
+</span></code></pre></div></div>
+
+<p>If you see a leftover shim such as:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gh.exe</span><span class="w">
+</span></code></pre></div></div>
+
+<p>remove it with:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Remove-Item</span><span class="w"> </span><span class="nx">C:\ProgramData\chocolatey\bin\gh.exe</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This removes the executable shortcut Chocolatey may have left behind.</p>
+
+<h3 id="restart-your-terminal">Restart your terminal</h3>
+
+<p>Close and reopen PowerShell or your terminal after cleanup.</p>
+
+<p>This helps clear any cached PATH state and ensures the shell is no longer holding onto stale command references.</p>
+
+<p>At this point, your Chocolatey-based GitHub CLI install should be cleanly removed.</p>
+
+<h2 id="part-b--install-github-cli-the-clean-way">Part B — Install GitHub CLI the clean way</h2>
+
+<p>Once the partial install is gone, reinstall <code class="language-plaintext highlighter-rouge">gh</code> using one of the following methods.</p>
+
+<h3 id="option-1--install-with-winget-recommended">Option 1 — Install with <code class="language-plaintext highlighter-rouge">winget</code> (recommended)</h3>
+
+<p>This is usually the cleanest option on modern Windows systems.</p>
+
+<p>Open <strong>PowerShell as Administrator</strong> and run:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">winget</span><span class="w"> </span><span class="nx">install</span><span class="w"> </span><span class="nt">--id</span><span class="w"> </span><span class="nx">GitHub.cli</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Why this is a strong option:</p>
+
+<ul>
+  <li>it handles PATH configuration cleanly</li>
+  <li>it avoids the partial-state issues that sometimes happen with interrupted package installs</li>
+  <li>it is a straightforward and well-supported installation path</li>
+</ul>
+
+<p>After installation, verify it worked:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gh</span><span class="w"> </span><span class="nt">--version</span><span class="w">
+</span></code></pre></div></div>
+
+<p>If you see the installed version returned, GitHub CLI is ready.</p>
+
+<h3 id="option-2--install-using-the-official-msi">Option 2 — Install using the official MSI</h3>
+
+<p>If <code class="language-plaintext highlighter-rouge">winget</code> gives you trouble for any reason, the official GitHub CLI installer is also a solid choice.</p>
+
+<p>Steps:</p>
+
+<ul>
+  <li>Go to the <a href="https://cli.github.com/">GitHub CLI Download Page</a></li>
+  <li>Download the Windows 64-bit installer</li>
+  <li>Run the <code class="language-plaintext highlighter-rouge">.msi</code></li>
+  <li>Keep the default settings, especially any PATH-related option</li>
+  <li>Restart your terminal after installation</li>
+</ul>
+
+<p>Then verify:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gh</span><span class="w"> </span><span class="nt">--version</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="part-c--authenticate-github-cli">Part C — Authenticate GitHub CLI</h2>
+
+<p>Once <code class="language-plaintext highlighter-rouge">gh</code> is installed, you will need to authenticate it.</p>
+
+<p>Run:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gh</span><span class="w"> </span><span class="nx">auth</span><span class="w"> </span><span class="nx">login</span><span class="w">
+</span></code></pre></div></div>
+
+<p>You will be prompted to choose how you want to connect GitHub CLI to your account.</p>
+
+<p>Select:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">GitHub.com</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Then choose:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">HTTPS</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Then choose:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Authenticate</span><span class="w"> </span><span class="nx">via</span><span class="w"> </span><span class="nx">browser</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This will:</p>
+
+<ul>
+  <li>open your browser</li>
+  <li>prompt you to authorize GitHub CLI</li>
+  <li>return you to the terminal once authentication is complete</li>
+</ul>
+
+<p>After selecting <strong>Authorize</strong>, you should be returned to the terminal fully authenticated.</p>
+
+<h3 id="why-this-authentication-step-matters">Why this authentication step matters</h3>
+
+<p>GitHub CLI usually requests access to the areas it needs in order to function properly, such as:</p>
+
+<ul>
+  <li>repositories (public and private)</li>
+  <li>workflows</li>
+  <li>gists</li>
+  <li>organization read access</li>
+</ul>
+
+<p>These permissions allow <code class="language-plaintext highlighter-rouge">gh</code> to do practical development work like:</p>
+
+<ul>
+  <li>reading repositories</li>
+  <li>creating pull requests</li>
+  <li>checking workflow runs</li>
+  <li>interacting with GitHub Actions</li>
+  <li>working across personal and organization repos</li>
+</ul>
+
+<h2 id="part-d--confirm-authentication-status">Part D — Confirm authentication status</h2>
+
+<p>After logging in, verify everything by running:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gh</span><span class="w"> </span><span class="nx">auth</span><span class="w"> </span><span class="nx">status</span><span class="w">
+</span></code></pre></div></div>
+
+<p>You should see output similar to:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">github.com</span><span class="w">
+  </span><span class="err">✓</span><span class="w"> </span><span class="nx">Logged</span><span class="w"> </span><span class="nx">in</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">github.com</span><span class="w"> </span><span class="nx">account</span><span class="w"> </span><span class="nx">DataEden</span><span class="w"> </span><span class="p">(</span><span class="n">keyring</span><span class="p">)</span><span class="w">
+  </span><span class="o">-</span><span class="w"> </span><span class="n">Active</span><span class="w"> </span><span class="nx">account:</span><span class="w"> </span><span class="nx">true</span><span class="w">
+  </span><span class="o">-</span><span class="w"> </span><span class="n">Git</span><span class="w"> </span><span class="nx">operations</span><span class="w"> </span><span class="nx">protocol:</span><span class="w"> </span><span class="nx">https</span><span class="w">
+  </span><span class="o">-</span><span class="w"> </span><span class="n">Token:</span><span class="w"> </span><span class="nx">gh_</span><span class="o">************************************</span><span class="w">
+  </span><span class="o">-</span><span class="w"> </span><span class="n">Token</span><span class="w"> </span><span class="nx">scopes:</span><span class="w"> </span><span class="s1">'gist'</span><span class="p">,</span><span class="w"> </span><span class="s1">'read:org'</span><span class="p">,</span><span class="w"> </span><span class="s1">'repo'</span><span class="p">,</span><span class="w"> </span><span class="s1">'workflow'</span><span class="w">
+</span></code></pre></div></div>
+
+<p>If you see output like this, your GitHub CLI installation and authentication are working correctly.</p>
+
+<h2 id="final-notes">Final Notes</h2>
+
+<p>A partial Chocolatey install is not uncommon if the command was started without elevation and then interrupted. The important thing is to clean up the leftover <code class="language-plaintext highlighter-rouge">gh</code> files before reinstalling.</p>
+
+<p>For most Windows users, <code class="language-plaintext highlighter-rouge">winget</code> or the official MSI will be the simplest and most reliable path forward.</p>
+
+<p>Once installed and authenticated, GitHub CLI becomes a very useful tool for working with repositories, pull requests, issues, and GitHub Actions directly from the terminal.</p>
+
+<hr />
+
+<p><strong>Data Inside Data™</strong>.</p>
+
+<p><em>Tech Hands, a Science Mind, and a Heart for Community</em>.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2026-08-01T11:30:50+00:00">August 1, 2026</time></p>
+
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/did-builder-showcase-staging/how-tos/github-workflow-branch-pr-merge-guide/" class="pagination--pager" title="GitHub Workflow: Branching, Pull Requests, Merging, and Conflict Resolution (Using CLI)">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+
+    </div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+      
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <footer class="page__footer" role="contentinfo">
+  <div class="page__footer-inner">
+    <div class="page__footer-grid">
+
+      <!-- LEFT: Title + email + quick links -->
+      <div class="page__footer-col">
+        <h2 class="page__footer-title">DataInsideData™ Staging</h2>
+
+        
+          <p class="page__footer-email">
+            <a href="mailto:contact@datainsidedata.com">contact@datainsidedata.com</a>
+          </p>
+        
+
+    <ul class="page__footer-quicklinks">
+     
+    <li>
+      <a href="/did-builder-showcase-staging/archive/">Archive</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/sitemap.xml">Sitemap</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/feed.xml">RSS</a>
+    </li>
+        
+     </ul>
+
+      </div>
+
+      <!-- MIDDLE: Social links (MM style) -->
+      <div class="page__footer-col">
+        <div class="page__footer-follow">
+          <ul class="social-icons">
+            
+              
+                
+                  <li>
+                    <a href="https://github.com/dataeden" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-github" aria-hidden="true"></i>
+                      <span class="label">GitHub</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="mailto:contact@datainsidedata.com" rel="nofollow noopener noreferrer">
+                      <i class="fas fa-fw fa-envelope" aria-hidden="true"></i>
+                      <span class="label">Email</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="https://www.linkedin.com/" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-linkedin" aria-hidden="true"></i>
+                      <span class="label">LinkedIn</span>
+                    </a>
+                  </li>
+                
+              
+            
+
+            
+              <li>
+                <a href="/did-builder-showcase-staging/feed.xml">
+                  <i class="fas fa-fw fa-rss-square" aria-hidden="true"></i>
+                  <span class="label">Feed</span>
+                </a>
+              </li>
+            
+          </ul>
+        </div>
+      </div>
+
+      <!-- RIGHT: Description -->
+      <div class="page__footer-col">
+        
+          <p class="page__footer-desc">Staging preview for DataInsideData™ and Builder Showcase testing.</p>
+        
+      </div>
+
+    </div>
+
+    <!-- Footer bottom bar (your DID style) -->
+    <div class="footer-bottom">
+      <p class="footer-bottom__copyright">
+        © 2026 Data Inside Data™. All rights reserved.
+      </p>
+
+      <p class="footer-bottom__powered">
+        Powered by
+        <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>,
+        <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a>, and
+        <a href="https://aws.amazon.com/route53/" target="_blank" rel="noopener">AWS Route 53</a>.
+      </p>
+
+      <p class="footer-bottom__legal">
+        <a href="/did-builder-showcase-staging/privacy/">Privacy Policy</a>
+        <span class="footer-bottom__sep">•</span>
+        <a href="/did-builder-showcase-staging/terms/">Terms of Use</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+      </footer>
+    </div>
+
+    
+  <script src="/did-builder-showcase-staging/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr.min.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-store.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+  
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  
+    <script src="/did-builder-showcase-staging/assets/js/mermaid-init.js"></script>
+  
+
+
+  </body>
+</html>

@@ -1,0 +1,64 @@
+# ============================================================
+# DataInsideData™ Builder Showcase / Ops Dashboard
+# Curated Python requirements
+# ============================================================
+#
+# Notes:
+# - This file is intentionally cleaner than a full `pip freeze`.
+# - Avoid committing local conda `file:///...` package references here.
+# - For a full environment snapshot, keep a separate requirements-lock.txt.
+#
+# Install:
+#   pip install -r requirements.txt
+
+# Environment / configuration
+python-dotenv==1.2.2
+
+# Database / SQL
+SQLAlchemy
+psycopg2-binary
+
+# Data handling
+pandas==2.3.3
+numpy
+pyarrow==23.0.1
+
+# YAML export / static data
+PyYAML
+
+# Dashboard
+streamlit==1.55.0
+
+# Visualization
+plotly==6.6.0
+matplotlib==3.10.8
+seaborn==0.13.2
+altair==6.0.0
+
+# Excel / tabular exports
+openpyxl==3.1.5
+xlrd==2.0.2
+tabulate==0.10.0
+
+# HTTP / API utilities
+requests
+urllib3
+httpx
+
+# AI / LLM integrations
+openai==2.30.0
+
+# Testing
+pytest==9.0.2
+
+# Finance / market data utilities
+yfinance==1.2.0
+quantstats==0.0.81
+fredapi==0.5.2
+
+# Machine learning / analytics
+scikit-learn
+imbalanced-learn
+xgboost
+statsmodels
+scipy

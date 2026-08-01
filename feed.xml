@@ -1,0 +1,2004 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://dataeden.github.io/did-builder-showcase-staging/feed.xml" rel="self" type="application/atom+xml" /><link href="https://dataeden.github.io/did-builder-showcase-staging/" rel="alternate" type="text/html" /><updated>2026-08-01T11:30:50+00:00</updated><id>https://dataeden.github.io/did-builder-showcase-staging/feed.xml</id><title type="html">DataInsideData™ Staging</title><subtitle>Staging preview for DataInsideData™ and Builder Showcase testing.</subtitle><author><name>Fari Lindo</name></author><entry><title type="html">Hardening a Supabase Edge Function Intake Form with Validation, Preview, Honeypot, and Duplicate Checks</title><link href="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/06/10/supabase-edge-function-intake-hardening/" rel="alternate" type="text/html" title="Hardening a Supabase Edge Function Intake Form with Validation, Preview, Honeypot, and Duplicate Checks" /><published>2026-06-10T17:00:00+00:00</published><updated>2026-06-10T17:00:00+00:00</updated><id>https://dataeden.github.io/did-builder-showcase-staging/blog/2026/06/10/supabase-edge-function-intake-hardening</id><content type="html" xml:base="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/06/10/supabase-edge-function-intake-hardening/"><![CDATA[<blockquote>
+  <p>This Post walks through the hardening phase of the <strong>DataInsideData™ Builder Showcase</strong> intake pipeline project.</p>
+</blockquote>
+
+<p>This is where the system moved from a foundation of:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Nice, this form works!
+</code></pre></div></div>
+
+<p>to:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The form works, protects the database, helps users catch mistakes, and blocks obvious duplicate/spam behavior.
+</code></pre></div></div>
+
+<p>That was a meaningly shift.</p>
+
+<p>The pipeline looks like this:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Jekyll / static form
+    ↓
+preview-before-submit
+    ↓
+Supabase Edge Function
+    ↓
+validation + duplicate checks
+    ↓
+Postgres table insert
+    ↓
+review queue
+    ↓
+promotion / publishing workflow
+</code></pre></div></div>
+
+<p>This guide is written for folks learning full-stack systems, static sites, Supabase, and backend validation. It is also practical enough for production-minded builders who want to avoid the classic mistake of maybe trusting the browser a bit too much.</p>
+
+<h2 id="why-frontend-validation-is-not-enough">Why frontend validation is not enough</h2>
+
+<p>Frontend validation is helpful because it gives users fast feedback.</p>
+
+<p>But frontend validation is not the source of truth.</p>
+
+<p>Anything in the browser can be bypassed.</p>
+
+<p>That means this is good:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HTML required fields
+JavaScript preview checks
+friendly error messages
+</code></pre></div></div>
+
+<p>But this is necessary:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Supabase Edge Function validation
+backend duplicate checks
+backend honeypot check
+backend API key check
+</code></pre></div></div>
+
+<p>The rule I use:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Frontend validation improves the experience.
+Backend validation protects the system.
+</code></pre></div></div>
+
+<h2 id="add-preview-before-submit">Add preview-before-submit</h2>
+
+<p>The preview step improves quality before the data reaches Supabase.</p>
+
+<p>The workflow becomes:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fill form
+    ↓
+preview cleaned values
+    ↓
+make edits if needed
+    ↓
+confirm and submit
+</code></pre></div></div>
+
+<p>This catches:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>misspelled title
+wrong repo URL
+missing tags
+missing required fields, etc...
+</code></pre></div></div>
+
+<p>When the user clicks <strong>Make Edits</strong>, send focus back to the form:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span><span class="nx">editButton</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">editButton</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">"</span><span class="s2">click</span><span class="dl">"</span><span class="p">,</span> <span class="nf">function </span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">previewPanel</span><span class="p">.</span><span class="nx">hidden</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="nx">pendingPayload</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+    <span class="nx">status</span><span class="p">.</span><span class="nx">textContent</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Make your edits, then preview again.</span><span class="dl">"</span><span class="p">;</span>
+
+    <span class="kd">const</span> <span class="nx">firstField</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">first_name</span><span class="dl">"</span><span class="p">);</span>
+
+    <span class="nx">form</span><span class="p">.</span><span class="nf">scrollIntoView</span><span class="p">({</span>
+      <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">smooth</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">block</span><span class="p">:</span> <span class="dl">"</span><span class="s2">start</span><span class="dl">"</span>
+    <span class="p">});</span>
+
+    <span class="nb">window</span><span class="p">.</span><span class="nf">setTimeout</span><span class="p">(</span><span class="nf">function </span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">if </span><span class="p">(</span><span class="nx">firstField</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">firstField</span><span class="p">.</span><span class="nf">focus</span><span class="p">({</span> <span class="na">preventScroll</span><span class="p">:</span> <span class="kc">true</span> <span class="p">});</span>
+      <span class="p">}</span>
+    <span class="p">},</span> <span class="mi">400</span><span class="p">);</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>That small UX detail matters. It keeps users from getting stranded at the bottom of the page.</p>
+
+<ul>
+  <li>The preview page needs to disappear after form submission, which will be addressed in the other round of modifications.</li>
+</ul>
+
+<h2 id="require-the-right-fields">Require the right fields</h2>
+
+<p>The form should require:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>first name
+last name
+email
+repo URL, etc...
+</code></pre></div></div>
+
+<p>Optional fields should be labeled:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>email (Optional)
+---
+
+## 4. Use strong acknowledgement language
+
+The ownership checkbox should be specific:
+
+```text
+I confirm that I own this project, contributed to it, or have permission to submit it for review.
+</code></pre></div></div>
+
+<p>The public showcase checkbox should also be intentional:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>I understand that, if approved, this project will be displayed publicly on the DataInsideData™ Builder Showcase...
+</code></pre></div></div>
+
+<ul>
+  <li>These boxes should not be pre-checked.</li>
+  <li>The user should actively acknowledge them.</li>
+</ul>
+
+<h2 id="add-a-honeypot-field">Add a honeypot field</h2>
+
+<p>A honeypot is a field real users should never fill.</p>
+
+<p>Bots may fill it because they see it in the HTML.</p>
+
+<p>Frontend Div Block:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"did-honeypot"</span> <span class="na">aria-hidden=</span><span class="s">"true"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"website"</span><span class="nt">&gt;</span>Website<span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;input</span>
+    <span class="na">type=</span><span class="s">"text"</span>
+    <span class="na">id=</span><span class="s">"website"</span>
+    <span class="na">name=</span><span class="s">"website"</span>
+    <span class="na">autocomplete=</span><span class="s">"off"</span>
+    <span class="na">tabindex=</span><span class="s">"-1"</span>
+  <span class="nt">&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p><strong>I used this SCSS styling, keeping hidden for seamless UX</strong>:</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.did-honeypot</span> <span class="p">{</span>
+  <span class="nl">position</span><span class="p">:</span> <span class="nb">absolute</span><span class="p">;</span>
+  <span class="nl">left</span><span class="p">:</span> <span class="m">-10000px</span><span class="p">;</span>
+  <span class="nl">top</span><span class="p">:</span> <span class="nb">auto</span><span class="p">;</span>
+  <span class="nl">width</span><span class="p">:</span> <span class="m">1px</span><span class="p">;</span>
+  <span class="nl">height</span><span class="p">:</span> <span class="m">1px</span><span class="p">;</span>
+  <span class="nl">overflow</span><span class="p">:</span> <span class="nb">hidden</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>Backend filtering</strong>:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span><span class="nf">cleanString</span><span class="p">(</span><span class="nx">payload</span><span class="p">.</span><span class="nx">website</span><span class="p">))</span> <span class="p">{</span>
+  <span class="nx">errors</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="dl">"</span><span class="s2">Invalid submission.</span><span class="dl">"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>That provides a simple first-layer bot filter.</p>
+
+<h2 id="validation-using-the-edge-function">Validation using the Edge Function</h2>
+
+<p>The Edge Function should validate a number of key targets:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>required fields
+email shape
+category allowlist
+tag count
+checkbox acknowledgements
+honeypot, etc...
+</code></pre></div></div>
+
+<p><strong>Example repo URL validation</strong>:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">isValidGitHubRepoUrl</span><span class="p">(</span><span class="nx">value</span><span class="p">:</span> <span class="kr">string</span><span class="p">):</span> <span class="nx">boolean</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">url</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">URL</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+
+    <span class="kd">const</span> <span class="nx">isGithubHost</span> <span class="o">=</span>
+      <span class="nx">url</span><span class="p">.</span><span class="nx">hostname</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">github.com</span><span class="dl">"</span> <span class="o">||</span> <span class="nx">url</span><span class="p">.</span><span class="nx">hostname</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">www.github.com</span><span class="dl">"</span><span class="p">;</span>
+
+    <span class="kd">const</span> <span class="nx">parts</span> <span class="o">=</span> <span class="nx">url</span><span class="p">.</span><span class="nx">pathname</span>
+      <span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="dl">"</span><span class="s2">/</span><span class="dl">"</span><span class="p">)</span>
+      <span class="p">.</span><span class="nf">map</span><span class="p">((</span><span class="nx">part</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">part</span><span class="p">.</span><span class="nf">trim</span><span class="p">())</span>
+      <span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="nb">Boolean</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="nx">isGithubHost</span> <span class="o">&amp;&amp;</span> <span class="nx">parts</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="store-request-metadata-carefully">Store request metadata carefully</h2>
+
+<p>For basic operational visibility, the Edge Function can store:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>user_agent
+request_origin
+request_referer
+client_ip_hash
+</code></pre></div></div>
+
+<p><strong>Example added columns</strong>:</p>
+
+<p>Interaction with Supabase  table is achieved using psycopg2, pgadmin,
+and postgresql</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">alter</span> <span class="k">table</span> <span class="k">public</span><span class="p">.</span><span class="n">builder_project_submissions</span>
+<span class="k">add</span> <span class="k">column</span> <span class="n">if</span> <span class="k">not</span> <span class="k">exists</span> <span class="n">user_agent</span> <span class="nb">text</span><span class="p">,</span>
+<span class="k">add</span> <span class="k">column</span> <span class="n">if</span> <span class="k">not</span> <span class="k">exists</span> <span class="n">request_origin</span> <span class="nb">text</span><span class="p">,</span>
+<span class="k">add</span> <span class="k">column</span> <span class="n">if</span> <span class="k">not</span> <span class="k">exists</span> <span class="n">client_ip_hash</span> <span class="nb">text</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>I prefer storing an IP hash instead of raw IP Address.</p>
+
+<p>That means the system can recognize repeated behavior later without casually storing the plain network address.</p>
+
+<h2 id="i-need-a-salt-but-what-is-it">I Need a Salt, but What is it?</h2>
+
+<p>A salt is a secret random value mixed into another value before hashing.</p>
+
+<p>Instead of storing:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>123.45.67.89
+</code></pre></div></div>
+
+<p>hash it instead:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SECRET_SALT:123.45.67.89
+</code></pre></div></div>
+
+<p>That makes the stored hash harder to guess or reverse by precomputing common values.</p>
+
+<p>Generate a salt using command:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python <span class="nt">-c</span> <span class="s2">"import secrets; print(secrets.token_hex(32))"</span>
+</code></pre></div></div>
+
+<p>And set it as a Supabase secret:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx supabase secrets <span class="nb">set </span><span class="nv">DID_IP_HASH_SALT</span><span class="o">=</span><span class="s2">"PASTE_RANDOM_HEX_STRING"</span>
+</code></pre></div></div>
+
+<p>In the Edge Function:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">salt</span> <span class="o">=</span> <span class="nx">Deno</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">DID_IP_HASH_SALT</span><span class="dl">"</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Privacy note: this is still security/anti-abuse metadata. It will be treated intentionally and documented in the privacy policy when implemented.</p>
+
+<h2 id="its-important-to-avoid-heavy-handed-blocking">It’s important to avoid heavy-handed blocking</h2>
+
+<p>So do not block:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>same email alone
+same repo URL alone
+same IP hash alone
+</code></pre></div></div>
+
+<p>Why?</p>
+
+<p>Because productive builders may make multiple submissions.</p>
+
+<p>And monorepos are real—I know I have one.</p>
+
+<p>So the better rule is:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>same actual submission evidence
+</code></pre></div></div>
+
+<p>And not the:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>same person
+</code></pre></div></div>
+
+<h2 id="add-duplicate-checks">Add duplicate checks</h2>
+
+<p>Duplicate rules:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>same email + same repo URL + same project title within 10 minutes
+    → block
+
+IP hash
+    → store for future analysis
+</code></pre></div></div>
+
+<p>Use <code class="language-plaintext highlighter-rouge">409 Conflict</code> for duplicate submissions.</p>
+
+<p>That is the balance: stop duplicates, but encourage productive users.</p>
+
+<h2 id="add-browser-cooldown">Add browser cooldown</h2>
+
+<p>This is simply a UX helper, not the main security layer.</p>
+
+<p>After successful submission:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">localStorage</span><span class="p">.</span><span class="nf">setItem</span><span class="p">(</span>
+  <span class="dl">"</span><span class="s2">did_builder_last_submission_at</span><span class="dl">"</span><span class="p">,</span>
+  <span class="nc">String</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nf">now</span><span class="p">())</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>Before confirming submission:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">lastSubmissionAt</span> <span class="o">=</span> <span class="nc">Number</span><span class="p">(</span>
+  <span class="nx">localStorage</span><span class="p">.</span><span class="nf">getItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">did_builder_last_submission_at</span><span class="dl">"</span><span class="p">)</span> <span class="o">||</span> <span class="dl">"</span><span class="s2">0</span><span class="dl">"</span>
+<span class="p">);</span>
+
+<span class="kd">const</span> <span class="nx">cooldownMs</span> <span class="o">=</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">;</span>
+
+<span class="k">if </span><span class="p">(</span><span class="nx">lastSubmissionAt</span> <span class="o">&amp;&amp;</span> <span class="nb">Date</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">-</span> <span class="nx">lastSubmissionAt</span> <span class="o">&lt;</span> <span class="nx">cooldownMs</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">status</span><span class="p">.</span><span class="nx">textContent</span> <span class="o">=</span>
+    <span class="dl">"</span><span class="s2">Please wait a moment before making another submission.</span><span class="dl">"</span><span class="p">;</span>
+  <span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This prevents rapid accidental resubmits from the same browser.</p>
+
+<h2 id="deploying-the-edge-function"><a href="/did-builder-showcase-staging/how-tos/1-supabase-ingestion-how-to/">Deploying the Edge Function</a></h2>
+
+<p>First, run a quick check in the supabase project function folder:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>supabase/functions/submit-builder-project
+deno check index.ts
+</code></pre></div></div>
+
+<p>Deploy:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx supabase functions deploy submit-builder-project
+</code></pre></div></div>
+
+<p>If the CLI asks for login:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx supabase login
+</code></pre></div></div>
+
+<p>IF the browser doesn’t execute / appear automatically</p>
+
+<ul>
+  <li>Copy the address from terminal and paste into browser.</li>
+  <li>Then sign into supabase account</li>
+  <li>Return to terminal</li>
+  <li>Select the desired project from the terminal list</li>
+</ul>
+
+<p>Then deploy again.</p>
+
+<h2 id="test-is-key">Test is Key</h2>
+
+<p>Test these:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>valid form
+unchecked ownership
+unchecked public showcase
+blank category
+blank tags
+bad repo URL
+honeypot filled
+same email + repo + title duplicate
+same email + same repo + different title, etc...
+</code></pre></div></div>
+
+<p>The goal is not to block productive users.</p>
+
+<p>The goal is to block bad payloads, obvious bots, and duplicate project submissions.</p>
+
+<h2 id="final-takeaway">Final takeaway</h2>
+
+<p>This phase is where the system starts to feel real.</p>
+
+<p>The form is not just collecting data anymore.</p>
+
+<p>Its guiding the user, protecting the backend, preserving trust, and keeping the workflow useful for all.</p>
+
+<p>That is the difference between:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>a form
+</code></pre></div></div>
+
+<p>and:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>an intake system
+</code></pre></div></div>
+
+<hr />
+
+<p><em>Data Inside Data™</em>.</p>
+
+<p><em>Tech Hands, a Science Mind, and a Heart for Community</em>.</p>]]></content><author><name>Fari Lindo</name></author><category term="How Tos" /><category term="Supabase" /><category term="Web Development" /><category term="Supabase" /><category term="Edge Functions" /><category term="Deno" /><category term="Jekyll" /><category term="Forms" /><category term="Validation" /><category term="Anti-Spam" /><category term="PostgreSQL" /><category term="JavaScript" /><category term="TypeScript" /><summary type="html"><![CDATA[A practical beginner-to-pro guide for hardening a static-site intake form backed by Supabase Edge Functions and Postgres.]]></summary></entry><entry><title type="html">From Notebooks to a Financial Intelligence Dashboard</title><link href="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/04/26/financial-intelligence-lab-dashboard/" rel="alternate" type="text/html" title="From Notebooks to a Financial Intelligence Dashboard" /><published>2026-04-26T17:00:00+00:00</published><updated>2026-04-26T17:00:00+00:00</updated><id>https://dataeden.github.io/did-builder-showcase-staging/blog/2026/04/26/financial-intelligence-lab-dashboard</id><content type="html" xml:base="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/04/26/financial-intelligence-lab-dashboard/"><![CDATA[<h2 id="from-notebooks-to-a-financial-intelligence-dashboard">From Notebooks to a Financial Intelligence Dashboard</h2>
+
+<blockquote>
+  <p>Turning raw portfolio tracking into a tested analytics system, AI-powered reporting engine, and interactive dashboard.</p>
+</blockquote>
+
+<h2 id="overview">Overview</h2>
+
+<p>The <strong><a href="https://datainsidedata.com/projects/ai-powered-financial-intelligence-lab/">Financial Intelligence Lab</a></strong> started as a simple idea:</p>
+
+<blockquote>
+  <p><em>Track a small investment portfolio and learn how markets behave.</em></p>
+</blockquote>
+
+<p>What it became is something much bigger:</p>
+
+<ul>
+  <li>a structured <strong>data pipeline</strong></li>
+  <li>a tested <strong>analytics system</strong></li>
+  <li>an <strong>AI-powered research layer</strong></li>
+  <li>and a live <strong>Streamlit dashboard</strong></li>
+</ul>
+
+<p>This project is part of the broader <strong>DataInsideData™ platform</strong>, where I build systems in public to bridge the gap between learning and real-world execution.</p>
+
+<h2 id="the-core-problem">The Core Problem</h2>
+
+<p>Most beginner investing workflows look like this:</p>
+
+<ul>
+  <li>spreadsheets</li>
+  <li>manual tracking</li>
+  <li>no reproducibility</li>
+  <li>no system-level insight</li>
+</ul>
+
+<p>That approach breaks quickly.</p>
+
+<p>I wanted to answer:</p>
+
+<blockquote>
+  <p><strong>What would a real analytics system for portfolio tracking look like?</strong></p>
+</blockquote>
+
+<h2 id="system-architecture">System Architecture</h2>
+
+<p>At a high level, the system evolved into this pipeline:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Portfolio Snapshots (CSV)
+        ↓
+Data Cleaning + Validation
+        ↓
+Market Data Backfill (Yahoo Finance)
+        ↓
+Merged Analysis Dataset
+        ↓
+Derived Metrics + Aggregations
+        ↓
+AI Insight Generation
+        ↓
+Streamlit Dashboard
+</code></pre></div></div>
+
+<p>This is no longer simply a dataset — it has matured into a <strong>data system</strong>.</p>
+
+<h2 id="phase-1--from-raw-data-to-structured-pipelines">Phase 1 — From Raw Data to Structured Pipelines</h2>
+
+<p>The first step was moving from raw CSVs to structured processing.</p>
+
+<h3 id="key-datasets">Key datasets</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">portfolio_snapshots.csv</code></li>
+  <li><code class="language-plaintext highlighter-rouge">portfolio_summary.csv</code></li>
+  <li><code class="language-plaintext highlighter-rouge">market_notes.csv</code></li>
+  <li><code class="language-plaintext highlighter-rouge">dividends.csv</code></li>
+</ul>
+
+<h3 id="what-changed">What changed</h3>
+
+<ul>
+  <li>standardized column naming</li>
+  <li>enforced data types</li>
+  <li>validation checks (duplicates, nulls)</li>
+  <li>reproducible load/merge pipeline</li>
+</ul>
+
+<p>This was the turning point:</p>
+
+<blockquote>
+  <p>From “tracking data” → to “engineering data”</p>
+</blockquote>
+
+<h2 id="phase-2--market-data-integration">Phase 2 — Market Data Integration</h2>
+
+<p>To move beyond static snapshots, I added:</p>
+
+<ul>
+  <li><strong>Yahoo Finance backfill</strong></li>
+  <li>daily historical prices</li>
+  <li>return calculations</li>
+</ul>
+
+<h3 id="new-capabilities">New capabilities</h3>
+
+<ul>
+  <li>price trends over time</li>
+  <li>volatility observation</li>
+  <li>normalized performance comparison</li>
+  <li>sector-level analysis</li>
+</ul>
+
+<p>Now the system could answer:</p>
+
+<blockquote>
+  <p><em>How are my assets behaving relative to each other?</em></p>
+</blockquote>
+
+<h2 id="phase-3--analysis-layer">Phase 3 — Analysis Layer</h2>
+
+<p>The merged dataset became the core analytics engine.</p>
+
+<h3 id="key-features">Key features</h3>
+
+<ul>
+  <li>position weights</li>
+  <li>unrealized return %</li>
+  <li>daily price change tracking</li>
+  <li>sector bucketing</li>
+  <li>dividend aggregation</li>
+</ul>
+
+<h3 id="example-outputs">Example outputs</h3>
+
+<ul>
+  <li>portfolio value over time</li>
+  <li>capital vs market gain</li>
+  <li>sector allocation trends</li>
+  <li>normalized performance curves</li>
+</ul>
+
+<p>This is where the project became:</p>
+
+<blockquote>
+  <p>A true <strong>analytics platform</strong>, not just tracking.</p>
+</blockquote>
+
+<h2 id="phase-4--ai-insight-generation">Phase 4 — AI Insight Generation</h2>
+
+<p>Next came the intelligence layer.</p>
+
+<p>Using structured payloads + OpenAI:</p>
+
+<ul>
+  <li>daily AI commentary</li>
+  <li>weekly reports</li>
+  <li>structured prompts (cost-controlled)</li>
+  <li>reproducible outputs saved as markdown</li>
+</ul>
+
+<h3 id="example-workflow">Example workflow</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Processed Data
+    ↓
+Structured Payload
+    ↓
+Prompt Builder
+    ↓
+LLM Response
+    ↓
+Markdown Report
+</code></pre></div></div>
+
+<p>This allowed the system to:</p>
+
+<ul>
+  <li>interpret trends</li>
+  <li>explain performance</li>
+  <li>generate research-style summaries</li>
+</ul>
+
+<h2 id="phase-5--streamlit-dashboard">Phase 5 — Streamlit Dashboard</h2>
+
+<p>Finally, everything was surfaced through a dashboard.</p>
+
+<h3 id="features">Features</h3>
+
+<ul>
+  <li>portfolio overview metrics</li>
+  <li>interactive charts</li>
+  <li>symbol filtering</li>
+  <li>sector breakdowns</li>
+  <li>AI report viewer</li>
+  <li>on-demand AI summary generation</li>
+</ul>
+
+<p>This transformed the system into: A <strong><a href="https://datainsidedata.com/projects/ai-powered-financial-intelligence-lab/">live financial analytics interface</a></strong></p>
+
+<blockquote>
+  <p>⚠️ This is a demo environment using non-sensitive data.</p>
+</blockquote>
+
+<h2 id="engineering-practices">Engineering Practices</h2>
+
+<p>This project was intentionally built using real development practices:</p>
+
+<ul>
+  <li>modular <code class="language-plaintext highlighter-rouge">src/</code> architecture</li>
+  <li>reusable functions</li>
+  <li>test coverage with <code class="language-plaintext highlighter-rouge">pytest</code></li>
+  <li>environment management (conda)</li>
+  <li>script-based pipelines (<code class="language-plaintext highlighter-rouge">python -m ...</code>)</li>
+  <li>structured directories</li>
+</ul>
+
+<p>Example:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>src/
+├── load_data.py
+├── market_data.py
+├── metrics.py
+├── charts.py
+├── ai_summary.py
+</code></pre></div></div>
+
+<p>This ensures:</p>
+
+<ul>
+  <li>reproducibility</li>
+  <li>scalability</li>
+  <li>maintainability</li>
+</ul>
+
+<h2 id="-security-considerations">🔐 Security Considerations</h2>
+
+<p>Because this involves financial data:</p>
+
+<ul>
+  <li>no API keys are exposed</li>
+  <li><code class="language-plaintext highlighter-rouge">.env</code> is protected</li>
+  <li>no brokerage credentials are used</li>
+  <li>demo-safe datasets can be used for public versions</li>
+</ul>
+
+<p>Future plans include:</p>
+
+<ul>
+  <li>secure deployment layers</li>
+  <li>access control</li>
+  <li>private analytics views</li>
+</ul>
+
+<h2 id="-deployment-strategy">🌐 Deployment Strategy</h2>
+
+<p>Because the main site is static (Jekyll), the dashboard is:</p>
+
+<ul>
+  <li>hosted separately</li>
+  <li>embedded via iframe</li>
+</ul>
+
+<h3 id="current-approach">Current approach</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Jekyll Site → Streamlit App (embedded)
+</code></pre></div></div>
+
+<h3 id="future-architecture">Future architecture</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CloudFront
+   ├── Static Site (Jekyll)
+   └── App Layer (Streamlit)
+</code></pre></div></div>
+
+<h2 id="what-this-project-demonstrates">What This Project Demonstrates</h2>
+
+<p>This project brings together:</p>
+
+<ul>
+  <li>data engineering</li>
+  <li>analytics</li>
+  <li>AI integration</li>
+  <li>dashboarding</li>
+  <li>system design</li>
+</ul>
+
+<p>More importantly:</p>
+
+<blockquote>
+  <p>It shows how small experiments can evolve into real systems.</p>
+</blockquote>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<ul>
+  <li>improved dashboard interactivity</li>
+  <li>real-time data ingestion</li>
+  <li>advanced AI analysis</li>
+  <li>scenario modeling</li>
+  <li>potential subscription-based research layer</li>
+</ul>
+
+<h2 id="final-thoughts">Final Thoughts</h2>
+
+<p>This started with:</p>
+
+<blockquote>
+  <p>“Let me track a small portfolio.”</p>
+</blockquote>
+
+<p>It became:</p>
+
+<blockquote>
+  <p>“Let me build a financial analytics platform.”</p>
+</blockquote>
+
+<p>That shift — from <strong>task → system → platform</strong> — is the core idea behind DataInsideData™.</p>
+
+<hr />
+
+<p><em>Data Inside Data™</em>.</p>
+
+<p><em>Tech Hands, a Science Mind, and a Heart for Community™</em>.</p>]]></content><author><name>Fari Lindo</name></author><category term="Projects" /><category term="Data Engineering" /><category term="Data Analytics" /><category term="FinTech" /><category term="Streamlit" /><category term="Data Engineering" /><category term="Data Science" /><category term="Python" /><category term="Portfolio Analytics" /><category term="ETL" /><category term="AI" /><category term="OpenAI" /><category term="Financial Intelligence Lab" /><category term="DataInsideData" /><category term="Visualizations &quot;learning-in-public&quot;" /><summary type="html"><![CDATA[How I transformed raw portfolio tracking into a tested analytics pipeline, AI-powered reporting system, and interactive Streamlit dashboard.]]></summary></entry><entry><title type="html">Financial Intelligence Lab — What I’m Learning From My First Few Days Investing</title><link href="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/03/24/did-financial-intelligence-lab/" rel="alternate" type="text/html" title="Financial Intelligence Lab — What I’m Learning From My First Few Days Investing" /><published>2026-03-24T17:00:00+00:00</published><updated>2026-03-24T17:00:00+00:00</updated><id>https://dataeden.github.io/did-builder-showcase-staging/blog/2026/03/24/did-financial-intelligence-lab</id><content type="html" xml:base="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/03/24/did-financial-intelligence-lab/"><![CDATA[<blockquote>
+  <p>Part of the <strong>Financial Intelligence Lab</strong> — a system for tracking, analyzing, and learning from real-world investment decisions over time.</p>
+</blockquote>
+
+<p>I recently started a small investing experiment. But instead of just “buying stocks,” I’m treating this like a <strong>learning lab</strong> — tracking what I buy, why I bought it, and what happens afterward. As I’ve been building this project, I’ve started to notice patterns — here’s what I’ve observed so far.</p>
+
+<h2 id="i-didnt-buy-random-stocks">I Didn’t Buy Random Stocks</h2>
+
+<p>I built a small portfolio with different types of investments:</p>
+
+<ul>
+  <li>Energy (oil-related companies like Exxon and Chevron)</li>
+  <li>Tech (like ServiceNow and NVIDIA)</li>
+  <li>Everyday goods (like consumer staples ETFs)</li>
+  <li>A high-risk stock (Lucid, and other EV companies)</li>
+</ul>
+
+<p>Each one has a different purpose.</p>
+
+<h2 id="the-market-reacts-to-real-world-events">The Market Reacts to Real-World Events</h2>
+
+<p>Recently, there were headlines about:</p>
+
+<ul>
+  <li>U.S. negotiating with Iran</li>
+  <li>Oil prices rising and falling quickly</li>
+  <li>Interest rates possibly going down</li>
+</ul>
+
+<p>These may look like news on the surface, but they function as inputs that actively shape stock prices, investment decisions, and market dynamics.</p>
+
+<p>For example:</p>
+
+<ul>
+  <li>Oil-related news → affects energy stocks</li>
+  <li>Interest rates → influence tech and growth stocks</li>
+</ul>
+
+<p>So when these inputs change, stock prices move.</p>
+
+<p>I track macro signals, sector behavior, and portfolio changes over time.</p>
+
+<p>That’s why I treat them as part of a system — not just headlines.</p>
+
+<h2 id="my-energy-stocks-performed-the-best">My Energy Stocks Performed the Best</h2>
+
+<p>Over the first few days:</p>
+
+<ul>
+  <li>Energy stocks went up steadily</li>
+  <li>They moved together (which means they’re tied to the same thing — oil)</li>
+</ul>
+
+<p>This showed me:</p>
+
+<p>👉 Some sectors move as a group</p>
+
+<h2 id="my-riskier-stock-moved-the-most">My Riskier Stock Moved the Most</h2>
+
+<p>Lucid (LCID), my small “experiment” stock:</p>
+
+<ul>
+  <li>moved up the most</li>
+  <li>changed faster than everything else</li>
+</ul>
+
+<p>That taught me:</p>
+
+<p>👉 Higher risk = bigger swings (up or down)</p>
+
+<h2 id="some-stocks-are-meant-to-be-boring">Some Stocks Are Meant to Be “Boring”</h2>
+
+<p>I also bought ETFs focused on:</p>
+
+<ul>
+  <li>everyday products</li>
+  <li>dividend-paying companies</li>
+</ul>
+
+<p>These didn’t move much.</p>
+
+<p>And that’s actually the point.</p>
+
+<p>👉 They help <strong>stabilize your portfolio</strong> by offsetting losses from other sectors or positions</p>
+
+<h2 id="i-got-paid-just-for-holding-stocks">I Got Paid Just for Holding Stocks</h2>
+
+<p>This was one of the most interesting parts.</p>
+
+<p>I received:</p>
+
+<ul>
+  <li>$0.47 from an energy ETF</li>
+  <li>$0.22 from a consumer staples ETF</li>
+</ul>
+
+<p>That’s called a <strong>dividend</strong>.</p>
+
+<p>Meaning that:</p>
+
+<p>👉 some investments pay you just for owning them</p>
+
+<p>A dividend is a payment a company makes to investors, usually from profits.
+It’s typically paid per share, so the more shares you own, the more you receive.</p>
+
+<p>👉 Total dividend = dividend per share × number of shares</p>
+
+<p>Over time, this creates a second stream of returns — not just price movement, but income.</p>
+
+<h2 id="what-i-realized">What I Realized</h2>
+
+<p>Even after just a few days, I can already see that:</p>
+
+<ul>
+  <li>different types of stocks behave differently</li>
+  <li>news affects markets quickly</li>
+  <li>diversification (mixing types) matters</li>
+</ul>
+
+<h2 id="the-big-idea">The Big Idea</h2>
+
+<p>This is not a “get rich quick” endeavor.</p>
+
+<p>I’m trying to understand:</p>
+
+<ul>
+  <li>how markets move</li>
+  <li>how different sectors behave</li>
+  <li>how decisions play out over time</li>
+</ul>
+
+<h2 id="why-im-documenting-this">Why I’m Documenting This</h2>
+
+<p>Because learning like this is powerful.</p>
+
+<p>Instead of guessing, I can:</p>
+
+<ul>
+  <li>track data</li>
+  <li>look for patterns</li>
+  <li>improve decisions</li>
+</ul>
+
+<h2 id="final-thought">Final Thought</h2>
+
+<p>This is just the beginning.</p>
+
+<p>Right now, it’s small — but it’s already evolving.</p>
+
+<p>I’m now tracking sector behavior, generating daily and weekly AI summaries</p>
+
+<p>Over time, this becomes:</p>
+
+<p>👉 a system<br />
+👉 a dataset<br />
+👉 and a way to actually understand how markets behave</p>
+
+<p>This is way more valuable than just buying a stock and hoping it goes up.</p>
+
+<h2 id="stay-tuned">Stay Tuned</h2>
+
+<p>I’ll be sharing weekly updates to the <a href="/projects/ai-powered-financial-intelligence-lab/">AI-Powered Financial Intelligence Lab (Flagship Project)</a>.</p>
+
+<p>You’ll get:</p>
+
+<ul>
+  <li>visualizations</li>
+  <li>documentation</li>
+  <li>direct links to project folders</li>
+</ul>
+
+<hr />
+
+<p><strong>Data Inside Data™</strong></p>
+
+<p><em>Tech Hands, a Science Mind, and a Heart for Community™.</em></p>]]></content><author><name>Fari Lindo</name></author><category term="financial-intelligence-lab" /><category term="analytics" /><category term="systems-thinking" /><category term="investing" /><category term="portfolio-analysis" /><category term="financial-markets" /><category term="data-analysis" /><category term="learning-in-public" /><category term="systems-thinking" /><category term="decision-systems" /><summary type="html"><![CDATA[A beginner-friendly breakdown of what I’ve learned from my first few days building a structured investment tracking system — from sector behavior to dividends and market signals.]]></summary></entry><entry><title type="html">Migrating from Minima to Minimal Mistakes (MM) — A Clean Approach</title><link href="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/26/did-Minima-to-minimal-mistakes-migration/" rel="alternate" type="text/html" title="Migrating from Minima to Minimal Mistakes (MM) — A Clean Approach" /><published>2026-01-26T17:00:00+00:00</published><updated>2026-01-26T17:00:00+00:00</updated><id>https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/26/did-Minima-to-minimal-mistakes-migration</id><content type="html" xml:base="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/26/did-Minima-to-minimal-mistakes-migration/"><![CDATA[<h2 id="introduction">Introduction</h2>
+
+<blockquote>
+  <p>This doc captures the build process, why I decided to migrate to MM, and the exact <strong>clean migration + override</strong> pattern I’m currently using.</p>
+</blockquote>
+
+<p>When I started <strong>DataInsideData.com</strong>, I intentionally chose the Minima theme. Why? It was simple, clean, and perfect for learning how Jekyll works.</p>
+
+<p>Since I was building to scale, I had to be prepared for when the site matured, so I needed:</p>
+
+<ul>
+  <li>Stronger navigation</li>
+  <li>Collections support</li>
+  <li>Built‑in search</li>
+  <li>Table of contents (TOC)</li>
+  <li>Related posts</li>
+  <li>A more flexible layout system</li>
+</ul>
+
+<p>The decision was clear: migrate to <strong>Minimal Mistakes</strong> — and do it
+cleanly.</p>
+
+<p>This post documents the exact migration pattern I used.</p>
+
+<h2 id="why-minimal-mistakes">Why Minimal Mistakes</h2>
+
+<p>Minimal Mistakes is more than a theme — it’s a structured blogging
+framework.</p>
+
+<h3 id="built-in-features">Built-in Features</h3>
+
+<ul>
+  <li>Greedy Nav responsive menu</li>
+  <li>Search (Lunr)</li>
+  <li>TOC support</li>
+  <li>Author profiles</li>
+  <li>Related posts</li>
+  <li>Breadcrumbs</li>
+  <li>Collections support</li>
+  <li>Archive layouts</li>
+  <li>Skins</li>
+</ul>
+
+<h2 id="nonbuilt-in-search-options-supported-via-overrides-or-integrations">Non–Built-In Search Options (Supported via Overrides or Integrations)</h2>
+
+<p>Lunr is great for relatively large sites, but there are non-built-in options that you may need to consider when your site gets <strong>very</strong> large:</p>
+
+<ul>
+  <li><strong>Algolia DocSearch</strong>
+    <ul>
+      <li>Requires the <code class="language-plaintext highlighter-rouge">jekyll-algolia</code> plugin</li>
+      <li>Needs API keys and indexing</li>
+      <li>Extremely fast and scalable for large sites</li>
+    </ul>
+  </li>
+  <li><strong>Simple-Jekyll-Search</strong>
+    <ul>
+      <li>Lightweight, client-side JavaScript search</li>
+      <li>Uses a JSON index similar to Lunr</li>
+      <li>Easy drop-in replacement via <code class="language-plaintext highlighter-rouge">search.html</code> override</li>
+    </ul>
+  </li>
+  <li><strong>Pagefind</strong>
+    <ul>
+      <li>Modern, Rust-based static search indexer</li>
+      <li>Very fast and works on GitHub Pages</li>
+      <li>Requires a build step (e.g., GitHub Actions)</li>
+    </ul>
+  </li>
+  <li><strong>Elasticlunr.js</strong>
+    <ul>
+      <li>Lunr-compatible but more flexible</li>
+      <li>Pure client-side, no backend required</li>
+      <li>Integrated by swapping out the Lunr JS include</li>
+    </ul>
+  </li>
+  <li><strong>Meilisearch</strong>
+    <ul>
+      <li>Requires hosting a backend search server</li>
+      <li>Fast, typo-tolerant, great for large datasets</li>
+      <li>Integrated via custom API calls in overridden layouts</li>
+    </ul>
+  </li>
+  <li><strong>Typesense</strong>
+    <ul>
+      <li>Backend search engine with instant-search performance</li>
+      <li>Requires custom JS + layout overrides</li>
+      <li>Good for structured, large-scale content</li>
+    </ul>
+  </li>
+  <li><strong>Custom Search APIs</strong>
+    <ul>
+      <li>Any REST API you build or host</li>
+      <li>Integrated by overriding <code class="language-plaintext highlighter-rouge">search.html</code> and adding custom JS</li>
+      <li>Useful for advanced or domain-specific search needs</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="mm-tradeoffs">MM Tradeoffs</h3>
+
+<p>More power = more structure.</p>
+
+<p>You must respect components like</p>
+
+<ul>
+  <li>Its class system (<code class="language-plaintext highlighter-rouge">.masthead</code>, <code class="language-plaintext highlighter-rouge">.page__footer</code>, <code class="language-plaintext highlighter-rouge">.archive__item</code>, etc.)</li>
+  <li>Its include pipeline</li>
+  <li>Its SCSS hierarchy</li>
+</ul>
+
+<h2 id="clean-migration-strategy-avoiding-collisions">Clean Migration Strategy (Avoiding Collisions)</h2>
+
+<p>If you previously customized <a href="https://datainsidedata.com/projects/jekyll-from-zero-to-production/">Minima</a></p>
+
+<p>Jekyll will prefer your local <code class="language-plaintext highlighter-rouge">_includes/*</code> over theme includes.</p>
+
+<p>That causes silent breakage.</p>
+
+<h3 id="disable-minima-overrides">Disable Minima Overrides</h3>
+
+<p>Rename old overrides</p>
+
+<pre><code class="language-jekyll">_includes/header.html → header.minima.bak
+_includes/head.html → head.minima.bak
+_includes/footer.html → footer.minima.bak
+</code></pre>
+
+<p>Let MM load clean defaults first. Then override intentionally.</p>
+
+<ul>
+  <li>After things work and you’re comfortable, remove these files or place in a backup folder.</li>
+</ul>
+
+<h2 id="correct-_configyml-setup">Correct <code class="language-plaintext highlighter-rouge">_config.yml</code> Setup</h2>
+
+<p>MM setup</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Use the MM theme instead of Minima</span>
+<span class="na">theme</span><span class="pi">:</span> <span class="s">minimal-mistakes-jekyll</span>
+
+<span class="c1"># Select one of MM’s built-in skins</span>
+<span class="na">minimal_mistakes_skin</span><span class="pi">:</span> <span class="s2">"</span><span class="s">default"</span>
+
+<span class="c1"># Core plugins used by MM and this site</span>
+<span class="na">plugins</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">jekyll-feed</span>              <span class="c1"># Generates RSS feed</span>
+  <span class="pi">-</span> <span class="s">jekyll-seo-tag</span>           <span class="c1"># Adds SEO meta tags</span>
+  <span class="pi">-</span> <span class="s">jekyll-sitemap</span>           <span class="c1"># Generates sitemap.xml</span>
+  <span class="pi">-</span> <span class="s">jekyll-paginate</span>          <span class="c1"># Enables pagination for blog index</span>
+  <span class="pi">-</span> <span class="s">jekyll-redirect-from</span>     <span class="c1"># Allows redirect_from in front matter</span>
+</code></pre></div></div>
+
+<h3 id="defaults-block">Defaults Block</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">defaults</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">scope</span><span class="pi">:</span>
+      <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">posts</span>
+    <span class="na">values</span><span class="pi">:</span>
+      <span class="na">layout</span><span class="pi">:</span> <span class="s">single</span>
+      <span class="na">author_profile</span><span class="pi">:</span> <span class="kc">false</span>
+      <span class="na">read_time</span><span class="pi">:</span> <span class="kc">true</span>
+      <span class="na">related</span><span class="pi">:</span> <span class="kc">true</span>
+
+  <span class="pi">-</span> <span class="na">scope</span><span class="pi">:</span>
+      <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">pages</span>
+    <span class="na">values</span><span class="pi">:</span>
+      <span class="na">layout</span><span class="pi">:</span> <span class="s">single</span>
+      <span class="na">author_profile</span><span class="pi">:</span> <span class="kc">false</span>
+</code></pre></div></div>
+
+<h3 id="collections-my-projects-collection">Collections (My Projects Collection)</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Custom collections allow structured content beyond blog posts</span>
+<span class="na">collections</span><span class="pi">:</span>
+  <span class="na">projects</span><span class="pi">:</span>
+    <span class="na">output</span><span class="pi">:</span> <span class="kc">true</span>                    <span class="c1"># Required to generate HTML pages</span>
+    <span class="na">permalink</span><span class="pi">:</span> <span class="s">/projects/:name/</span>     <span class="c1"># Clean URLs without date structure</span>
+</code></pre></div></div>
+
+<ul>
+  <li>output: true is critical — without it, Jekyll will not generate pages for this collection.</li>
+</ul>
+
+<p><strong>Works with</strong>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>_projects/
+</code></pre></div></div>
+
+<p>and</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>projects/projects.markdown
+</code></pre></div></div>
+
+<h2 id="navigation-mm-native">Navigation (MM Native)</h2>
+
+<p>Navigation lives in</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">_data/navigation.yml</span>
+</code></pre></div></div>
+
+<p>Example</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">main</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">title</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Start</span><span class="nv"> </span><span class="s">Here"</span>
+    <span class="na">url</span><span class="pi">:</span> <span class="s">/</span>
+  <span class="pi">-</span> <span class="na">title</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Posts"</span>
+    <span class="na">url</span><span class="pi">:</span> <span class="s">/blog/</span>
+  <span class="pi">-</span> <span class="na">title</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Projects"</span>
+    <span class="na">url</span><span class="pi">:</span> <span class="s">/projects/</span>
+  <span class="pi">-</span> <span class="na">title</span><span class="pi">:</span> <span class="s2">"</span><span class="s">About"</span>
+    <span class="na">url</span><span class="pi">:</span> <span class="s">/about/</span>
+  <span class="pi">-</span> <span class="na">title</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Contact"</span>
+    <span class="na">url</span><span class="pi">:</span> <span class="s">/contact/</span>
+</code></pre></div></div>
+
+<h3 id="if-posts-link-throw-404s">If “Posts” Link Throw 404s</h3>
+
+<ul>
+  <li>Check permalink</li>
+  <li>Check navigation.yml</li>
+  <li>Ensure trailing slash consistency</li>
+</ul>
+
+<h2 id="scss-architecture-this-is-critical">SCSS Architecture (This is Critical)</h2>
+
+<p>Keep the <code class="language-plaintext highlighter-rouge">main.scss</code> file:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>assets/css/main.scss
+</code></pre></div></div>
+
+<p>And the file must include the following so that MM can import necessary skins, styling, etc…</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">---</span>
+<span class="nt">---</span>
+
+<span class="o">//</span> <span class="nt">Required</span> <span class="nt">front</span> <span class="nt">matter</span> <span class="nt">so</span> <span class="nt">Jekyll</span> <span class="nt">processes</span> <span class="nt">this</span> <span class="nt">file</span>
+<span class="o">@</span><span class="nt">charset</span> <span class="s2">"utf-8"</span><span class="p">;</span>
+
+<span class="c1">// Import selected MM skin</span>
+<span class="k">@import</span> <span class="s2">"minimal-mistakes/skins/default"</span><span class="p">;</span>
+
+<span class="c1">// Import full MM framework</span>
+<span class="k">@import</span> <span class="s2">"minimal-mistakes"</span><span class="p">;</span>
+
+<span class="c1">// Load your custom overrides last</span>
+<span class="k">@import</span> <span class="s2">"minimal-mistakes/custom"</span><span class="p">;</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>Order matters here. Custom overrides must load after the core framework to prevent specificity issues.</li>
+</ul>
+
+<p>Put all styling overrides in:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>_sass/minimal-mistakes/_custom.scss
+</code></pre></div></div>
+
+<p>Avoid maintaining separate Minima legacy <code class="language-plaintext highlighter-rouge">custom.css</code> files long-term.</p>
+
+<ul>
+  <li>I renamed mine and moved to a backup folder in another directory.</li>
+</ul>
+
+<h2 id="footer-override-strategy">Footer Override Strategy</h2>
+
+<p>Why Copy Instead of Rewriting?</p>
+
+<ul>
+  <li>Jekyll prefers local overrides over theme files</li>
+  <li>Partial rewrites can break layout structure</li>
+  <li>Copying preserves upstream compatibility</li>
+</ul>
+
+<p>Use the command below to locate the installed gem:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle show minimal-mistakes-jekyll
+</code></pre></div></div>
+
+<p>Then locate <code class="language-plaintext highlighter-rouge">footer.html</code> in the _inludes folder:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>_includes/footer.html
+</code></pre></div></div>
+
+<p>Copy the entire content of the file into the project and modify intentionally.</p>
+
+<ul>
+  <li>Avoid Minima-specific includes like:</li>
+</ul>
+
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="cp">{%-</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span>social.html<span class="w"> </span><span class="cp">-%}</span>
+
+</code></pre></div></div>
+
+<h2 id="masthead--navigation--spacing-adjustments-respect-the-structure">Masthead &amp; Navigation + Spacing Adjustments (Respect the Structure)</h2>
+
+<p>Minimal Mistakes uses a structured masthead system built around:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">.masthead</code></li>
+  <li><code class="language-plaintext highlighter-rouge">.masthead__inner-wrap</code></li>
+  <li><code class="language-plaintext highlighter-rouge">.greedy-nav</code></li>
+</ul>
+
+<p>Unlike Minima, navigation is not hardcoded in the layout — it is driven by <code class="language-plaintext highlighter-rouge">_data/navigation.yml</code> and rendered through includes.</p>
+
+<p>This means:</p>
+
+<ul>
+  <li>Styling adjustments should happen in SCSS, not layout edits</li>
+  <li>Navigation structure should live in data files</li>
+  <li>Layout overrides should be avoided unless absolutely necessary</li>
+</ul>
+
+<p>If spacing needs adjustment, override styles in <code class="language-plaintext highlighter-rouge">_custom.scss</code>:</p>
+
+<p>Example — Reduce vertical padding:</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.masthead</span> <span class="p">{</span>
+  <span class="nl">padding-top</span><span class="p">:</span> <span class="m">0</span><span class="mi">.15rem</span><span class="p">;</span>
+  <span class="nl">padding-bottom</span><span class="p">:</span> <span class="m">0</span><span class="mi">.15rem</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.masthead__inner-wrap</span> <span class="p">{</span>
+  <span class="nl">padding-top</span><span class="p">:</span> <span class="m">0</span><span class="p">;</span>
+  <span class="nl">padding-bottom</span><span class="p">:</span> <span class="m">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>Note</strong>: Avoid copying and modifying masthead.html unless you fully understand the include chain.
+In most cases, configuration and styling are enough.</p>
+
+<h2 id="blog--archive-pages">Blog + Archive Pages</h2>
+
+<p>Blog page</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">title</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Posts"</span>
+<span class="na">layout</span><span class="pi">:</span> <span class="s">home</span>
+<span class="na">permalink</span><span class="pi">:</span> <span class="s">/blog/</span>
+<span class="nn">---</span>
+</code></pre></div></div>
+
+<p>Archive page</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">title</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Archive"</span>
+<span class="na">layout</span><span class="pi">:</span> <span class="s">archive</span>
+<span class="na">permalink</span><span class="pi">:</span> <span class="s">/archive/</span>
+<span class="nn">---</span>
+</code></pre></div></div>
+
+<p>Minimal Mistakes does not use Minima’s blog layout structure.</p>
+
+<ul>
+  <li>Update incrementally and run the development server to preview changes locally:</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle <span class="nb">exec </span>jekyll serve
+</code></pre></div></div>
+
+<h2 id="lessons-learned">Lessons Learned</h2>
+
+<ul>
+  <li>Disable old overrides before migrating</li>
+  <li>Keep one PR per outcome</li>
+  <li>Resolve conflicts on feature branches</li>
+  <li>Let MM load default structure first</li>
+  <li>Respect the layout hierarchy</li>
+</ul>
+
+<h2 id="what-this-migration-actually-changed">What This Migration Actually Changed</h2>
+
+<ul>
+  <li><a href="https://datainsidedata.com/projects/jekyll-from-zero-to-production/">Minima</a> teaches you Jekyll.</li>
+  <li>Minimal Mistakes teaches you structure.</li>
+</ul>
+
+<p>The migration wasn’t just about a new theme — it was about adopting a framework that enforces discipline:</p>
+
+<ul>
+  <li>Respect layout hierarchy</li>
+  <li>Understand include pipelines</li>
+  <li>Separate configuration from styling</li>
+  <li>Override intentionally, not reactively</li>
+</ul>
+
+<p>Minimal Mistakes doesn’t add complexity.<br />
+It introduces architecture.</p>
+
+<p>And architecture is what allows a site to scale — not just in size, but in clarity, maintainability, and professionalism.</p>
+
+<p><strong>If you migrate intentionally</strong>:</p>
+
+<ul>
+  <li>Disable old overrides first</li>
+  <li>Let defaults load cleanly</li>
+  <li>Override only what you understand</li>
+  <li>Keep changes incremental</li>
+</ul>
+
+<p>You won’t simply be switching themes.<br />
+You’ll be upgrading your system design.</p>
+
+<p>That’s the real shift.</p>
+
+<p>Structure is not complexity.<br />
+It’s intentional design.</p>
+
+<hr />
+
+<p><strong>Data Inside Data™</strong></p>
+
+<p><em>Tech Hands, a Science Mind, and a Heart for Community™.</em></p>]]></content><author><name>Fari Lindo</name></author><category term="jekyll" /><category term="minimal-mistakes" /><category term="jekyll" /><category term="minima" /><category term="minimal-mistakes" /><category term="migration" /><category term="devops" /><summary type="html"><![CDATA[A step-by-step migration guide from Minima to Minimal Mistakes, including config, overrides, navigation, projects collections, and footer fixes.]]></summary></entry><entry><title type="html">Why Jekyll Is a Top Choice for a DevOps-Aware Business Website</title><link href="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/19/Why-a-Jekyll-DevOps-Aware-website/" rel="alternate" type="text/html" title="Why Jekyll Is a Top Choice for a DevOps-Aware Business Website" /><published>2026-01-19T17:00:00+00:00</published><updated>2026-01-19T17:00:00+00:00</updated><id>https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/19/Why-a-Jekyll-DevOps-Aware-website</id><content type="html" xml:base="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/19/Why-a-Jekyll-DevOps-Aware-website/"><![CDATA[<blockquote>
+  <p>This post covers why I chose Jekyll to build my site—and why building with intention matters. You can build just for now, just for fun, or for the future you’re proud of. Hopefully this offers a little clarity and a lot of encouragement along the way.</p>
+</blockquote>
+
+<p>When I started building <strong>DataInsideData.com</strong>, I wasn’t just picking a tool to publish blog posts.</p>
+
+<p>I was choosing <strong>how I wanted the site to operate in production</strong>.</p>
+
+<p><strong>That distinction matters</strong>.</p>
+
+<p>Jekyll isn’t just a static site generator — it’s a <strong>static-first operational model</strong> that fits naturally with DevOps/DevSecOps and GitOps thinking.</p>
+
+<p>Let me walk you through <em>why</em>.</p>
+
+<h2 id="what-no-database-really-means-in-jekyll">What “No Database” Really Means in Jekyll</h2>
+
+<p>At its core, Jekyll builds your entire website <strong>ahead of time</strong>.</p>
+
+<p>Instead of generating pages on every request, Jekyll outputs plain files:</p>
+
+<ul>
+  <li>HTML</li>
+  <li>CSS</li>
+  <li>JavaScript</li>
+  <li>Images</li>
+</ul>
+
+<p>Once built, those files are what get deployed.</p>
+
+<h3 id="in-practice-that-means">In practice, that means</h3>
+
+<ul>
+  <li>😮 No database</li>
+  <li>😁 No backend runtime</li>
+  <li>👏 No server-side request processing</li>
+</ul>
+
+<h3 id="traditional-cms-wordpress-drupal">Traditional CMS (WordPress, Drupal)</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Request → Server → Database → Backend Logic → HTML → User
+</code></pre></div></div>
+
+<ul>
+  <li>Content lives in a database</li>
+  <li>Pages are assembled on every request</li>
+  <li>Requires patching, monitoring, backups, and scaling</li>
+</ul>
+
+<h3 id="jekyll">Jekyll</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Build time → Static files → User
+</code></pre></div></div>
+
+<ul>
+  <li>Content lives in Markdown files</li>
+  <li>Pages are generated once at build time</li>
+  <li>Hosting becomes dramatically simpler</li>
+</ul>
+
+<blockquote>
+  <p>💡 <strong>Mental model</strong><br />
+Jekyll trades runtime complexity for build-time clarity.</p>
+</blockquote>
+
+<h2 id="why-this-matters-especially-for-devops">❓Why This Matters (Especially for DevOps)</h2>
+
+<p>This design choice unlocks several benefits that matter a lot in production environments.</p>
+
+<h3 id="speed">Speed</h3>
+
+<p>Static files load instantly.<br />
+There are no database queries and no server-side logic slowing things down.</p>
+
+<h3 id="security">Security</h3>
+
+<ul>
+  <li>No database → no SQL injection</li>
+  <li>No admin panel → fewer attack vectors</li>
+  <li>No backend → dramatically reduced surface area</li>
+</ul>
+
+<h3 id="simplicity">Simplicity</h3>
+
+<p>Your “database” becomes:</p>
+
+<ul>
+  <li>Markdown files</li>
+  <li>YAML front matter</li>
+  <li>Folder structure</li>
+</ul>
+
+<p>That’s it.</p>
+
+<h3 id="version-control">Version Control</h3>
+
+<p>Your entire site lives in Git:</p>
+
+<ul>
+  <li>Branches</li>
+  <li>Pull requests</li>
+  <li>Code review</li>
+  <li>Rollbacks</li>
+</ul>
+
+<p>This fits perfectly with GitHub-based workflows.</p>
+
+<h3 id="cost">Cost</h3>
+
+<p>Static hosting is often free or near-zero cost:</p>
+
+<ul>
+  <li>GitHub Pages</li>
+  <li>Netlify</li>
+  <li>Cloudflare Pages</li>
+  <li>S3 + CDN</li>
+</ul>
+
+<p>For a business or solo founder, that’s huge.</p>
+
+<h2 id="how-jekyll-organizes-content-without-the-chaos">How Jekyll Organizes Content (Without the Chaos)</h2>
+
+<p>Jekyll gives you structure without forcing a CMS UI.</p>
+
+<p>Here’s a simplified view of how content is organized:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.
+├── _posts/
+│   └── 2026-01-20-why-jekyll.md
+├── _pages/
+│   ├── about.md
+│   ├── contact.md
+│   └── privacy.md
+├── _projects/
+│   └── ci-preview-setup.md
+├── _layouts/
+├── _includes/
+└── assets/
+</code></pre></div></div>
+
+<h3 id="posts-_posts">Posts (<code class="language-plaintext highlighter-rouge">_posts/</code>)</h3>
+
+<p>Best for:</p>
+
+<ul>
+  <li>Blog articles</li>
+  <li>Tutorials</li>
+  <li>Build notes</li>
+  <li>Thought leadership</li>
+</ul>
+
+<p>Named like:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>YYYY-MM-DD-title.md
+</code></pre></div></div>
+
+<h3 id="pages">Pages</h3>
+
+<p>Good for standalone pages like:</p>
+
+<ul>
+  <li>About</li>
+  <li>Contact</li>
+  <li>Legal pages</li>
+  <li>Landing pages</li>
+  <li>etc.</li>
+</ul>
+
+<h3 id="collections">Collections</h3>
+
+<p>Collections are where Jekyll really shines.</p>
+
+<p>They let you create custom content types, such as:</p>
+
+<ul>
+  <li>Case studies</li>
+  <li>Labs</li>
+  <li>Datasets</li>
+  <li>Documentation</li>
+</ul>
+
+<p>Defined once in <code class="language-plaintext highlighter-rouge">_config.yml</code>:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">collections</span><span class="pi">:</span>
+  <span class="na">projects</span><span class="pi">:</span>
+    <span class="na">output</span><span class="pi">:</span> <span class="kc">true</span>
+  <span class="na">case_studies</span><span class="pi">:</span>
+    <span class="na">output</span><span class="pi">:</span> <span class="kc">true</span>
+</code></pre></div></div>
+
+<p>This gives you Content Management System (CMS)-like power <strong>without a CMS</strong>.</p>
+
+<h2 id="from-content-to-production-build-flow">From Content to Production (Build Flow)</h2>
+
+<p>Here’s the lifecycle at a high level:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Markdown + Templates
+        ↓
+   Jekyll Build
+        ↓
+     _site/
+        ↓
+   GitHub Pages / Content Delivery Network (CDN)
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">_site/</code> folder is the final artifact.</p>
+
+<p>Once it’s built:</p>
+
+<ul>
+  <li>Nothing mutates</li>
+  <li>Nothing executes</li>
+  <li>Nothing queries a database</li>
+</ul>
+
+<p>That’s what gets deployed.</p>
+
+<h2 id="why-this-fits-devops-and-gitops-thinking">Why This Fits DevOps (and GitOps) Thinking</h2>
+
+<p>Jekyll naturally encourages:</p>
+
+<ul>
+  <li>Immutable infrastructure</li>
+  <li>Build once, deploy everywhere</li>
+  <li>No mutable runtime state</li>
+  <li>Predictable, testable builds</li>
+  <li>CI/CD-first workflows</li>
+</ul>
+
+<p>In other words:</p>
+
+<blockquote>
+  <p>🎯 <strong>Key insight</strong><br />
+You’re not just building a website — you’re building a pipeline.</p>
+</blockquote>
+
+<p>This is exactly how modern infrastructure is designed.</p>
+
+<h2 id="the-big-picture">The Big Picture</h2>
+
+<p>Jekyll gives you:</p>
+
+<ul>
+  <li>The structure of a CMS</li>
+  <li>The security of static files</li>
+  <li>The discipline of DevOps</li>
+  <li>The flexibility of code</li>
+</ul>
+
+<p>For <strong>DataInsideData.com</strong>, it’s the foundation of a <strong>professional, scalable, and production-ready platform</strong> — without unnecessary complexity.</p>
+
+<hr />
+
+<p><em>Data Inside Data™</em>.</p>
+
+<p><em>Tech Hands, a Science Mind, and a Heart for Community</em>.</p>]]></content><author><name>Fari Lindo</name></author><category term="jekyll" /><category term="devops" /><category term="ci-cd" /><category term="git-ops" /><category term="github-actions" /><category term="github-pages" /><category term="aws" /><category term="documentation" /><category term="jekyll" /><category term="devops" /><category term="static-sites" /><summary type="html"><![CDATA[Why Jekyll’s static-first architecture aligns so well with modern DevOps, security, and business scalability.]]></summary></entry><entry><title type="html">How to Build a Jekyll Blog in Less Than 15 Minutes</title><link href="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/11/first-did-post-jekyll-build-intro/" rel="alternate" type="text/html" title="How to Build a Jekyll Blog in Less Than 15 Minutes" /><published>2026-01-11T17:00:00+00:00</published><updated>2026-01-11T17:00:00+00:00</updated><id>https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/11/first-did-post-jekyll-build-intro</id><content type="html" xml:base="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/11/first-did-post-jekyll-build-intro/"><![CDATA[<blockquote>
+  <p><strong>Series note:</strong><br />
+This post covers the fastest possible path from zero to a running Jekyll site.<br />
+In the next post, I’ll show how I improved this scaffold with better structure, styling, and a production-ready workflow.</p>
+</blockquote>
+
+<h2 id="a-beginner-friendly-jekyll-tutorial-for-those-interested-in">A Beginner-Friendly Jekyll Tutorial for Those Interested in</h2>
+
+<ul>
+  <li>learning how to design websites/blogs.</li>
+  <li>Building a site for work.</li>
+  <li>Building a living portfolio to showcase your evolving projects, professional development, etc.</li>
+  <li>Creating a testing/learning environment in order to practice HTML, CSS, JS, etc.</li>
+  <li>Practicing by implementing DevSecOps/DevOps concepts and methods in a real world development/production environment.</li>
+  <li>Or anything else that demonstrates your hands on technical knowledge.</li>
+</ul>
+
+<blockquote>
+  <p>Note: This tutorial is specifically For Windows Users. We’ll have an equivalent MacOS version in an upcoming post.</p>
+</blockquote>
+
+<h2 id="these-are-the-first-steps-before-you-actually-begin-building-your-awesome-site">These are the first steps before you actually begin building your awesome site</h2>
+
+<h3 id="installing-jekyll">Installing jekyll</h3>
+
+<p>✔ Step 1</p>
+
+<ul>
+  <li>navigate to <a href="https://rubyinstaller.org/downloads/">RubyInstaller Downloads</a></li>
+  <li>if you’re not sure about which version to use or new to jekyll?
+    <ul>
+      <li>jekyll recommends using Ruby+Devkit 3.4.X (x64) installer.</li>
+      <li>this version has the
+        <blockquote>
+          <p>largest number of compatible gems and installs the MSYS2 Devkit alongside RUBY, so gems with C-extensions can be compiled immediately.</p>
+        </blockquote>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>✔ Step 2</p>
+
+<ul>
+  <li>use selected default options for installation</li>
+  <li>after installation finishes
+    <ul>
+      <li>click finish and the installer will automatically install the other dependencies</li>
+      <li>this happens because of the <strong>checked [✔️])</strong> check box on the installation wizard.
+        <ul>
+          <li>this executes/runs</li>
+        </ul>
+      </li>
+    </ul>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> ridk <span class="nb">install</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>and is needed for installing gems with native extnesions.</li>
+      <li>additional documentation can be found here <a href="https://rubyinstaller.org/downloads/">RubyInstaller Documentation</a>
+        <ul>
+          <li>From the options list, choose <strong>3</strong>, <code class="language-plaintext highlighter-rouge">MSYS2 and MINGW development toolchain</code></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>We need to open up the powershell (ps) command line interface (CLI) or command prompt (cmd), so we can check if the application has been installed correctly.</li>
+  <li>
+    <p>Simply click then type into the search tool located on the bottom task bar.</p>
+  </li>
+  <li>
+    <p><strong>Open Windows Search Tool</strong>:
+<img src="/assets/images/imgs/search_tool_in_windows_bottowm_task_bar.png" alt="Windows Search icon" /></p>
+  </li>
+  <li>Now let’s check if Ruby has been installed correctly by running.</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ruby <span class="nt">--version</span>
+</code></pre></div></div>
+
+<ul>
+  <li>you should see something similar to this:</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ruby 3.4.8 <span class="o">(</span>2025-12-17 revision 995b59f666<span class="o">)</span> + PRISM <span class="o">[</span>x64-mingw-ucrt]
+</code></pre></div></div>
+
+<p>✔ Step 3</p>
+
+<ul>
+  <li>close out the terminal window and reopen so changes to the <code class="language-plaintext highlighter-rouge">PATH</code> environmemt are reflected.</li>
+  <li>Install Jekyll and Bundler using</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem intall jekyll bundler
+</code></pre></div></div>
+
+<p>✔ Step 4</p>
+
+<ul>
+  <li>Now let’s check if Jekyll has been installed correctly by running this command</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll <span class="nt">-v</span>
+</code></pre></div></div>
+
+<p>✔ Step 5</p>
+
+<ul>
+  <li>If you want to update Jekyll for any reason, run the following command, for example to update your installation (remove brackets)</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem update <span class="nt">--system</span> <span class="o">[</span> add version number here] 
+</code></pre></div></div>
+
+<h3 id="congratulations-on-installing-ruby-and-jekyll-you-are-now-ready-to-create-your-blog">Congratulations on installing Ruby and Jekyll, you are now ready to create your blog🤓😎</h3>
+
+<ul>
+  <li>This section shows how to create a simple blog upon which you can then build your preferred awesome site.</li>
+</ul>
+
+<h3 id="after-installing-the-jekyll">After installing the jekyll</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem intall jekyll bundler
+</code></pre></div></div>
+
+<h3 id="create-new-jekyll-site-at-myblog-by-running-this-command">Create new jekyll site at ./myblog by running this command</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll new myblog
+</code></pre></div></div>
+
+<h3 id="change-directory-to-myblog-thusly">Change directory to /myblog thusly</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>myblog
+</code></pre></div></div>
+
+<h3 id="build-the-site-and-make-it-available-on-your-local-server">Build the site and make it available on your local server</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle <span class="nb">exec </span>jekyll serve
+</code></pre></div></div>
+
+<h3 id="now-browse-to-the-following-local-web-address-provided">Now browse to the following local web-address provided</h3>
+
+<p><code class="language-plaintext highlighter-rouge">http://localhost:4000</code> or something similar , by holding down <code class="language-plaintext highlighter-rouge">ctrl</code> on the keyboard and clicking the link to open the page in your <code class="language-plaintext highlighter-rouge">default</code> browser.</p>
+
+<ul>
+  <li>Or by copying the link and pasting it into your browser.</li>
+</ul>
+
+<p>This tutorial is based on the <em><a href="https://jekyllrb.com/docs/installation/windows/">Full Jekyll Documentation</a>.</em></p>
+
+<blockquote>
+  <p>Presented by <a href="https://www.datainsidedata.com">DataInsideData</a>™ - Tech Hands, A Science Mind, and a Heart for community™.</p>
+</blockquote>
+
+<hr />
+
+<p><em>Data Inside Data™</em>.</p>
+
+<p><em>Tech Hands, a Science Mind, and a Heart for Community</em>.</p>]]></content><author><name>Fari Lindo</name></author><category term="jekyll" /><category term="cli" /><category term="devsecops" /><category term="static sites" /><category term="jekyll" /><category term="command line" /><category term="html" /><category term="css" /><category term="markdown" /><summary type="html"><![CDATA[A beginner-friendly guide...]]></summary></entry><entry><title type="html">From Zero to Live: Setting Up My Jekyll Blog with GitHub Pages and AWS Route 53</title><link href="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/02/from-zero-to-live-jekyll-blog/" rel="alternate" type="text/html" title="From Zero to Live: Setting Up My Jekyll Blog with GitHub Pages and AWS Route 53" /><published>2026-01-02T17:00:00+00:00</published><updated>2026-01-02T17:00:00+00:00</updated><id>https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/02/from-zero-to-live-jekyll-blog</id><content type="html" xml:base="https://dataeden.github.io/did-builder-showcase-staging/blog/2026/01/02/from-zero-to-live-jekyll-blog/"><![CDATA[<blockquote>
+  <p>Note: The AWS Route53 domain must be fully configured before using this method. Optionally one can use github pages address to render the blog/website.</p>
+</blockquote>
+
+<p>In less than a week I went from <strong>zero</strong> to a fully deployed, professional blog at <a href="https://datainsidedata.com">datainsidedata.com</a>.</p>
+
+<p>This wasn’t just a “hello world” experiment. I wanted a lean, pro-grade stack for this project using:</p>
+
+<p>✔ Jekyll (static site generator)<br />
+✔ GitHub Pages (free hosting)<br />
+✔ AWS Route 53 (custom domain + DNS)</p>
+
+<ul>
+  <li>This post provides a walkthrough of how I did it, what I learned, and how you can replicate (or improve) the setup for your business, nonprofit, or personal brand.</li>
+  <li>I provide a deep dive into <a href="/projects/jekyll-from-zero-to-production/">building a blog using <strong>Minima theme</strong></a>.</li>
+</ul>
+
+<h2 id="the-stack">The Stack</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Jekyll</td>
+      <td>Static site generator</td>
+    </tr>
+    <tr>
+      <td>GitHub Pages</td>
+      <td>Free hosting for site</td>
+    </tr>
+    <tr>
+      <td>AWS Route 53</td>
+      <td>DNS + custom domain</td>
+    </tr>
+    <tr>
+      <td>VS Code</td>
+      <td>Local development</td>
+    </tr>
+    <tr>
+      <td>datainsidedata.com</td>
+      <td>My custom domain</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-why-jekyll-instead-of-just-htmlcssjs">💡 Why Jekyll Instead of Just HTML/CSS/JS?</h2>
+
+<p>When I started this, I asked myself: <em>“Why not just code a static site by hand?”</em></p>
+
+<p>Here’s why I chose Jekyll:</p>
+
+<h3 id="built-for-blogs">Built for Blogs</h3>
+
+<p>Jekyll was literally designed for blogs. It supports:</p>
+
+<ul>
+  <li><strong>Markdown posts</strong></li>
+  <li>Categories &amp; tags out of the box</li>
+  <li>Auto-generated archive &amp; pagination</li>
+  <li>Clean permalinks like <code class="language-plaintext highlighter-rouge">/2026/07/15/my-jekyll.html</code></li>
+</ul>
+
+<p>With pure HTML/CSS/JS, I’d have to hand-code all of that.</p>
+
+<h3 id="minimalist-and-professional">Minimalist and Professional</h3>
+
+<p>Jekyll doesn’t need a heavy backend (no PHP, no databases).<br />
+It’s <strong>just static files</strong>—fast, secure, and deploys beautifully on GitHub Pages.</p>
+
+<h3 id="gems-and-themes--less-reinventing-the-wheel">Gems and Themes = Less Reinventing the Wheel</h3>
+
+<ul>
+  <li>The <strong>Minimal Mistakes</strong> theme gave me a professional design instantly.</li>
+  <li>Gems like <code class="language-plaintext highlighter-rouge">jekyll-feed</code> and <code class="language-plaintext highlighter-rouge">jekyll-seo-tag</code> handle RSS feeds &amp; SEO for me.</li>
+</ul>
+
+<p>Pure HTML/CSS/JS? I’d be reinventing:<br />
+✔ Sitemap.xml<br />
+✔ RSS feed<br />
+✔ SEO metadata<br />
+✔ Responsive layouts</p>
+
+<h3 id="one-command--whole-site-built">One Command → Whole Site Built</h3>
+
+<p>Jekyll lets me run:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle <span class="nb">exec </span>jekyll build
+</code></pre></div></div>
+
+<p>…and it renders all posts, layouts, and assets into the <code class="language-plaintext highlighter-rouge">_site</code> folder, ready for deployment.</p>
+
+<p>In a pure static setup, I’d manually copy/paste and keep track of every link. 😬</p>
+
+<h2 id="-initial-setup-jekyll--minimal-mistakes-theme">📦 Initial Setup: Jekyll + Minimal Mistakes Theme</h2>
+
+<h3 id="install-ruby-bundler-and-jekyll">Install Ruby, Bundler, and Jekyll</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem <span class="nb">install </span>bundler jekyll
+</code></pre></div></div>
+
+<h3 id="create-a-new-jekyll-site">Create a new Jekyll site</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll new datainsidedata-website
+<span class="nb">cd </span>datainsidedata-website
+bundle <span class="nb">install</span>
+</code></pre></div></div>
+
+<h3 id="add-the-minimal-mistakes-theme-for-a-clean-professional-look">Add the Minimal Mistakes theme for a clean, professional look</h3>
+
+<h3 id="configure-_configyml">Configure <code class="language-plaintext highlighter-rouge">_config.yml</code></h3>
+
+<ul>
+  <li>Set site title, description, author info</li>
+  <li>Enable pagination &amp; pretty permalinks</li>
+  <li>Set up categories &amp; tags</li>
+</ul>
+
+<p>📂 <strong>Project Structure (before build):</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>_data/
+_includes/
+_layouts/
+_pages/
+_posts/
+_site/  <span class="o">(</span>auto-generated by Jekyll build<span class="o">)</span>
+</code></pre></div></div>
+
+<h2 id="-custom-domain-with-github-pages--aws-route-53">🌐 Custom Domain with GitHub Pages + AWS Route 53</h2>
+
+<h3 id="private--public-repo-workflow">Private + Public Repo Workflow</h3>
+
+<p>Since GitHub Pages doesn’t serve from private repos unless you pay for Pro:</p>
+
+<ol>
+  <li>Private repo: <code class="language-plaintext highlighter-rouge">did-site-private</code> (holds full Jekyll source)</li>
+  <li>Public repo: <code class="language-plaintext highlighter-rouge">did-site-public</code> (hosts built site for Pages)</li>
+</ol>
+
+<p>👨🏾‍💻 Local workflow:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Build site</span>
+bundle <span class="nb">exec </span>jekyll build
+
+<span class="c"># Push to public repo</span>
+<span class="nb">cd </span>_site
+git init
+git remote add origin https://github.com/dataeden/did-site-public.git
+git add <span class="nb">.</span>
+git commit <span class="nt">-m</span> <span class="s2">"Deploy"</span>
+git push <span class="nt">-u</span> origin main
+</code></pre></div></div>
+
+<h3 id="aws-route-53-dns-setup">AWS Route 53 DNS Setup</h3>
+
+<p>Add A records:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>185.199.108.153
+185.199.109.153
+185.199.110.153
+185.199.111.153
+</code></pre></div></div>
+
+<p>Add a CNAME file in the public repo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>datainsidedata.com
+</code></pre></div></div>
+
+<p>Verify domain with GitHub:<br />
+Add a TXT record in Route 53 like:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>_github-pages-challenge.datainsidedata.com  TXT  <span class="s2">"abc123xyz456"</span>
+</code></pre></div></div>
+
+<p>Enable HTTPS in GitHub Pages after TLS cert provision.</p>
+
+<h2 id="sneak-peek-automating-with-github-actions-no-more-_site-pushes">Sneak Peek: Automating with GitHub Actions (No More _site Pushes!)</h2>
+
+<p>Here’s the workflow I’m planning:</p>
+
+<p>📂 <strong>.github/workflows/deploy.yml</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">name</span><span class="pi">:</span> <span class="s">Build and Deploy Jekyll Site</span>
+
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">push</span><span class="pi">:</span>
+    <span class="na">branches</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">main</span>  <span class="c1"># Watch for changes in private repo</span>
+
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">build-deploy</span><span class="pi">:</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+
+    <span class="na">steps</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Checkout private repo</span>
+      <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v3</span>
+
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Setup Ruby + Jekyll</span>
+      <span class="na">uses</span><span class="pi">:</span> <span class="s">ruby/setup-ruby@v1</span>
+      <span class="na">with</span><span class="pi">:</span>
+        <span class="na">ruby-version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3.1'</span>
+
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Install dependencies</span>
+      <span class="na">run</span><span class="pi">:</span> <span class="s">bundle install</span>
+
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Build site</span>
+      <span class="na">run</span><span class="pi">:</span> <span class="s">bundle exec jekyll build</span>
+
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Deploy to public repo</span>
+      <span class="na">uses</span><span class="pi">:</span> <span class="s">peaceiris/actions-gh-pages@v3</span>
+      <span class="na">with</span><span class="pi">:</span>
+        <span class="na">github_token</span><span class="pi">:</span> <span class="s">$</span>
+        <span class="na">publish_dir</span><span class="pi">:</span> <span class="s">./_site</span>
+        <span class="na">publish_branch</span><span class="pi">:</span> <span class="s">main</span>
+        <span class="na">destination_repo</span><span class="pi">:</span> <span class="s">dataeden/did-site-public</span>
+</code></pre></div></div>
+
+<p>With this in place:</p>
+
+<ul>
+  <li>Push to <code class="language-plaintext highlighter-rouge">did-site-private</code></li>
+  <li>GitHub Actions auto-builds &amp; deploys to <code class="language-plaintext highlighter-rouge">did-site-public</code></li>
+  <li>No more manual <code class="language-plaintext highlighter-rouge">_site</code> pushes 🚀</li>
+</ul>
+
+<h2 id="lessons-learned">Lessons Learned</h2>
+
+<p>💥 _pages folder pain: Jekyll didn’t respect links until I restructured pages.<br />
+🔥 Custom nav bar: Built my own in <code class="language-plaintext highlighter-rouge">bash _includes/header.html + _includes/nav.html.</code><br />
+🕒 DNS propagation: Patience and coffee are dev tools too.</p>
+
+<h2 id="the-result">The Result</h2>
+
+<p>✅ Live at datainsidedata.com<br />
+✅ Clean navigation, custom logo, HTTPS-secured<br />
+✅ Learned Jekyll + DNS at a pro level</p>
+
+<h2 id="whats-next">What’s Next?</h2>
+
+<p>✔ Publish more posts (like this one!)<br />
+✔ Add Google Analytics<br />
+✔ Fully automate deploys with GitHub Actions<br />
+✔ Share more dev journey content</p>
+
+<p>📺 <em>Watch the full video walkthrough →</em> [Coming soon!]</p>
+
+<hr />
+
+<p><strong>Data Inside Data™</strong>.</p>
+
+<p><em>Tech Hands, a science Mind, and a Heart for Community™.</em></p>]]></content><author><name>Fari Lindo</name></author><category term="github-pages" /><category term="aws-route53" /><category term="jekyll" /><category term="blog" /><category term="devsecops" /><category term="static sites" /><category term="aws" /><category term="ruby" /><category term="cli" /><category term="html" /><category term="css" /><category term="markdown" /><summary type="html"><![CDATA[How I built and deployed a pro-grade Jekyll blog in less than 7-days using GitHub Pages and AWS Route 53.]]></summary></entry></feed>

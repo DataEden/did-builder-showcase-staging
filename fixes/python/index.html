@@ -1,0 +1,476 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.27.1 by Michael Rose
+  Copyright 2013-2025 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Python Fixes - DataInsideData™ Staging</title>
+<meta name="description" content="Staging preview for DataInsideData™ and Builder Showcase testing.">
+
+
+  <meta name="author" content="Fari Lindo">
+  
+
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="DataInsideData™ Staging">
+<meta property="og:title" content="Python Fixes">
+<meta property="og:url" content="https://dataeden.github.io/did-builder-showcase-staging/fixes/python/">
+
+
+  <meta property="og:description" content="Staging preview for DataInsideData™ and Builder Showcase testing.">
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="canonical" href="https://dataeden.github.io/did-builder-showcase-staging/fixes/python/">
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/did-builder-showcase-staging/feed.xml" type="application/atom+xml" rel="alternate" title="DataInsideData™ Staging Feed">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+  
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/did-builder-showcase-staging/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css"></noscript>
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/did-builder-showcase-staging/assets/images/imgs/apple-touch-icon-180.png">
+
+<link rel="icon" type="image/png" href="/did-builder-showcase-staging/assets/images/imgs/site-icon-512.png">
+
+<link rel="icon" type="image/x-icon" href="/did-builder-showcase-staging/assets/images/imgs/favicon.ico">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/did-builder-showcase-staging/assets/images/imgs/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/did-builder-showcase-staging/assets/images/imgs/favicon-16.png">
+
+
+  </head>
+
+  <body class="layout--single" dir="ltr">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/did-builder-showcase-staging/"><img src="/did-builder-showcase-staging/assets/images/logos/FuturisticBrand.png" alt="DataInsideData™ Staging"></a>
+        
+        <a class="site-title" href="/did-builder-showcase-staging/">
+          DataInsideData™ Staging
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/"
+                
+                
+              >Start Here</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/blog/"
+                
+                
+              >Posts</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/projects/"
+                
+                
+              >Projects</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/how-tos/"
+                
+                
+              >How Tos</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/fixes/"
+                
+                
+              >Fixes</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/about/"
+                
+                
+              >About</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/contact/"
+                
+                
+              >Contact</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+    
+      <nav class="nav__list">
+  
+  <input id="ac-toc" name="accordion-toc" type="checkbox" />
+  <label for="ac-toc">Toggle Menu</label>
+  <ul class="nav__items">
+    
+      
+      
+        <li>
+          
+            <a href="/did-builder-showcase-staging/fixes/conda/"><span class="nav__sub-title">Conda</span></a>
+          
+
+          
+        </li>
+      
+        <li>
+          
+            <a href="/did-builder-showcase-staging/fixes/database-systems/"><span class="nav__sub-title">Database Systems</span></a>
+          
+
+          
+        </li>
+      
+        <li>
+          
+            <a href="/did-builder-showcase-staging/fixes/jekyll/"><span class="nav__sub-title">Jekyll</span></a>
+          
+
+          
+        </li>
+      
+        <li>
+          
+            <a href="/did-builder-showcase-staging/fixes/python/"><span class="nav__sub-title">Python</span></a>
+          
+
+          
+        </li>
+      
+    
+  </ul>
+</nav>
+
+    
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Python Fixes">
+    
+    
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">
+            <a href="https://dataeden.github.io/did-builder-showcase-staging/fixes/python/" itemprop="url">Python Fixes
+</a>
+          </h1>
+          
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Below are all fixes categorized under <strong>Python</strong>.</p>
+
+<div class="list__item">
+  <article class="archive__item" itemscope="" itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/did-builder-showcase-staging/fixes/python-eol-conda-migration-fix/" rel="permalink">Migrating an End-of-Life Python Kernel (3.8 / 3.9 → 3.10+)
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          2 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">A clean, reproducible, professional workflow for upgrading unsupported Python environments without breaking your stack.
+</p>
+  </article>
+</div>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+      </footer>
+
+      
+
+      
+
+    </div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+      
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <footer class="page__footer" role="contentinfo">
+  <div class="page__footer-inner">
+    <div class="page__footer-grid">
+
+      <!-- LEFT: Title + email + quick links -->
+      <div class="page__footer-col">
+        <h2 class="page__footer-title">DataInsideData™ Staging</h2>
+
+        
+          <p class="page__footer-email">
+            <a href="mailto:contact@datainsidedata.com">contact@datainsidedata.com</a>
+          </p>
+        
+
+    <ul class="page__footer-quicklinks">
+     
+    <li>
+      <a href="/did-builder-showcase-staging/archive/">Archive</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/sitemap.xml">Sitemap</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/feed.xml">RSS</a>
+    </li>
+        
+     </ul>
+
+      </div>
+
+      <!-- MIDDLE: Social links (MM style) -->
+      <div class="page__footer-col">
+        <div class="page__footer-follow">
+          <ul class="social-icons">
+            
+              
+                
+                  <li>
+                    <a href="https://github.com/dataeden" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-github" aria-hidden="true"></i>
+                      <span class="label">GitHub</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="mailto:contact@datainsidedata.com" rel="nofollow noopener noreferrer">
+                      <i class="fas fa-fw fa-envelope" aria-hidden="true"></i>
+                      <span class="label">Email</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="https://www.linkedin.com/" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-linkedin" aria-hidden="true"></i>
+                      <span class="label">LinkedIn</span>
+                    </a>
+                  </li>
+                
+              
+            
+
+            
+              <li>
+                <a href="/did-builder-showcase-staging/feed.xml">
+                  <i class="fas fa-fw fa-rss-square" aria-hidden="true"></i>
+                  <span class="label">Feed</span>
+                </a>
+              </li>
+            
+          </ul>
+        </div>
+      </div>
+
+      <!-- RIGHT: Description -->
+      <div class="page__footer-col">
+        
+          <p class="page__footer-desc">Staging preview for DataInsideData™ and Builder Showcase testing.</p>
+        
+      </div>
+
+    </div>
+
+    <!-- Footer bottom bar (your DID style) -->
+    <div class="footer-bottom">
+      <p class="footer-bottom__copyright">
+        © 2026 Data Inside Data™. All rights reserved.
+      </p>
+
+      <p class="footer-bottom__powered">
+        Powered by
+        <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>,
+        <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a>, and
+        <a href="https://aws.amazon.com/route53/" target="_blank" rel="noopener">AWS Route 53</a>.
+      </p>
+
+      <p class="footer-bottom__legal">
+        <a href="/did-builder-showcase-staging/privacy/">Privacy Policy</a>
+        <span class="footer-bottom__sep">•</span>
+        <a href="/did-builder-showcase-staging/terms/">Terms of Use</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+      </footer>
+    </div>
+
+    
+  <script src="/did-builder-showcase-staging/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr.min.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-store.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+  
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  
+    <script src="/did-builder-showcase-staging/assets/js/mermaid-init.js"></script>
+  
+
+
+  </body>
+</html>

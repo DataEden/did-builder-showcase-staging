@@ -1,0 +1,676 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.27.1 by Michael Rose
+  Copyright 2013-2025 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Fixing Conda + PowerShell Hijacking on Windows (VS Code) - DataInsideData™ Staging</title>
+<meta name="description" content="Fix Conda alias/module hijacking in PowerShell and restore stable usage.">
+
+
+  <meta name="author" content="Fari Lindo">
+  
+  <meta property="article:author" content="Fari Lindo">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="DataInsideData™ Staging">
+<meta property="og:title" content="Fixing Conda + PowerShell Hijacking on Windows (VS Code)">
+<meta property="og:url" content="https://dataeden.github.io/did-builder-showcase-staging/fixes/conda-powershell-hijack/">
+
+
+  <meta property="og:description" content="Fix Conda alias/module hijacking in PowerShell and restore stable usage.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2026-08-01T11:30:50+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="https://dataeden.github.io/did-builder-showcase-staging/fixes/conda-powershell-hijack/">
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/did-builder-showcase-staging/feed.xml" type="application/atom+xml" rel="alternate" title="DataInsideData™ Staging Feed">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+  
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/did-builder-showcase-staging/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css"></noscript>
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/did-builder-showcase-staging/assets/images/imgs/apple-touch-icon-180.png">
+
+<link rel="icon" type="image/png" href="/did-builder-showcase-staging/assets/images/imgs/site-icon-512.png">
+
+<link rel="icon" type="image/x-icon" href="/did-builder-showcase-staging/assets/images/imgs/favicon.ico">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/did-builder-showcase-staging/assets/images/imgs/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/did-builder-showcase-staging/assets/images/imgs/favicon-16.png">
+
+
+  </head>
+
+  <body class="layout--single" dir="ltr">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/did-builder-showcase-staging/"><img src="/did-builder-showcase-staging/assets/images/logos/FuturisticBrand.png" alt="DataInsideData™ Staging"></a>
+        
+        <a class="site-title" href="/did-builder-showcase-staging/">
+          DataInsideData™ Staging
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/"
+                
+                
+              >Start Here</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/blog/"
+                
+                
+              >Posts</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/projects/"
+                
+                
+              >Projects</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/how-tos/"
+                
+                
+              >How Tos</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/fixes/"
+                
+                
+              >Fixes</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/about/"
+                
+                
+              >About</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/contact/"
+                
+                
+              >Contact</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+    
+      <nav class="nav__list">
+  
+  <input id="ac-toc" name="accordion-toc" type="checkbox" />
+  <label for="ac-toc">Toggle Menu</label>
+  <ul class="nav__items">
+    
+      
+      
+        <li>
+          
+            <a href="/did-builder-showcase-staging/fixes/conda/"><span class="nav__sub-title">Conda</span></a>
+          
+
+          
+        </li>
+      
+        <li>
+          
+            <a href="/did-builder-showcase-staging/fixes/database-systems/"><span class="nav__sub-title">Database Systems</span></a>
+          
+
+          
+        </li>
+      
+        <li>
+          
+            <a href="/did-builder-showcase-staging/fixes/jekyll/"><span class="nav__sub-title">Jekyll</span></a>
+          
+
+          
+        </li>
+      
+        <li>
+          
+            <a href="/did-builder-showcase-staging/fixes/python/"><span class="nav__sub-title">Python</span></a>
+          
+
+          
+        </li>
+      
+    
+  </ul>
+</nav>
+
+    
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Fixing Conda + PowerShell Hijacking on Windows (VS Code)">
+    <meta itemprop="description" content="Fix Conda alias/module hijacking in PowerShell and restore stable usage.">
+    <meta itemprop="datePublished" content="2026-08-01T11:30:50+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">
+            <a href="https://dataeden.github.io/did-builder-showcase-staging/fixes/conda-powershell-hijack/" itemprop="url">Fixing Conda + PowerShell Hijacking on Windows (VS Code)
+</a>
+          </h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          3 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-layer-group"></i> Technical Breakdown</h4></header>
+              <ul class="toc__menu"><li><a href="#conda-powershell-hijacking-fix">Conda PowerShell Hijacking Fix</a></li><li><a href="#problem-summary">Problem Summary</a></li><li><a href="#why-this-happens">Why this happens</a></li><li><a href="#root-causes-identified">Root Causes Identified</a></li><li><a href="#-what-worked-the-fix">💡 What Worked (The Fix)</a><ul><li><a href="#identify-hijacking">Identify Hijacking</a></li><li><a href="#remove-the-hijacking-layers">Remove the Hijacking Layers</a></li><li><a href="#verify-conda-itself-works">Verify Conda Itself Works</a></li></ul></li><li><a href="#recommended-workflow-going-forward">Recommended Workflow Going Forward</a><ul><li><a href="#stable-working-pattern">Stable Working Pattern</a></li><li><a href="#use-conda-run-instead-of-activation">Use conda run instead of activation</a></li><li><a href="#export-environments-without-activating">Export environments without activating</a></li></ul></li><li><a href="#cicd-example-snippet">CI/CD Example snippet</a></li><li><a href="#-optional-stabilize-powershell-permanently">🔒 Optional: Stabilize PowerShell Permanently</a></li><li><a href="#key-takeaways">Key Takeaways</a></li><li><a href="#-final-state">🏁 Final State</a></li></ul>
+            </nav>
+          </aside>
+        
+        <h2 id="conda-powershell-hijacking-fix">Conda PowerShell Hijacking Fix</h2>
+
+<blockquote>
+  <p>This document captures a real-world debugging session resolving a <strong>broken Conda activation</strong> setup in <strong>Windows PowerShell / VS Code</strong> caused by command hijacking, profile conflicts, and shell integration issues.</p>
+</blockquote>
+
+<p>The result is a <strong>stable, reproducible Conda workflow</strong> suitable for DevOps, data science, and CI/CD use.</p>
+
+<h2 id="problem-summary">Problem Summary</h2>
+
+<p>Symptoms included:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">conda activate &lt;env&gt;</code> failing with:</li>
+</ul>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="n">conda-script.py:</span><span class="w"> </span><span class="nx">error:</span><span class="w"> </span><span class="nx">argument</span><span class="w"> </span><span class="nx">COMMAND:</span><span class="w"> </span><span class="nx">invalid</span><span class="w"> </span><span class="nx">choice:</span><span class="w"> </span><span class="s1">''</span><span class="w">
+  </span><span class="n">Invoke-Expression:</span><span class="w"> </span><span class="nx">Cannot</span><span class="w"> </span><span class="nx">bind</span><span class="w"> </span><span class="nx">argument</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">parameter</span><span class="w"> </span><span class="s1">'Command'</span><span class="w"> </span><span class="nx">because</span><span class="w"> </span><span class="nx">it</span><span class="w"> </span><span class="nx">is</span><span class="w"> </span><span class="nx">an</span><span class="w"> </span><span class="nx">empty</span><span class="w"> </span><span class="nx">string.</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">conda env export</code> producing empty files</li>
+  <li>Errors reappearing after restarting VS Code</li>
+  <li><code class="language-plaintext highlighter-rouge">where conda</code> returning inconsistent or multiple paths</li>
+  <li>Conda working <em>only</em> when invoked via explicit <code class="language-plaintext highlighter-rouge">.bat</code> paths</li>
+</ul>
+
+<h2 id="why-this-happens">Why this happens</h2>
+
+<p>Why Conda breaks in PowerShell / VS Code</p>
+
+<ul>
+  <li>PowerShell uses aliases and modules that override executables</li>
+  <li>VS Code loads a different PowerShell profile than your normal terminal</li>
+  <li>Conda’s PowerShell hook is fragile and often fails silently</li>
+  <li>Windows installs multiple conda shims, and the wrong one gets picked up</li>
+</ul>
+
+<blockquote>
+  <p><strong>Note</strong>: Activation is still fine in Git Bash, WSL, or CMD. PowerShell is the only shell where activation is fragile.</p>
+</blockquote>
+
+<h2 id="root-causes-identified">Root Causes Identified</h2>
+
+<ol>
+  <li><strong>PowerShell Alias Hijacking</strong>
+    <ul>
+      <li>An auto-created PowerShell alias named <code class="language-plaintext highlighter-rouge">conda</code> was intercepting calls.</li>
+      <li>This alias pointed to a broken PowerShell module (<code class="language-plaintext highlighter-rouge">Conda.psm1</code>).</li>
+    </ul>
+  </li>
+  <li><strong>Multiple Conda Entry Points on PATH</strong>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">conda.exe</code></li>
+      <li><code class="language-plaintext highlighter-rouge">conda.bat</code> in <code class="language-plaintext highlighter-rouge">Library\bin</code></li>
+      <li><code class="language-plaintext highlighter-rouge">conda.bat</code> in <code class="language-plaintext highlighter-rouge">condabin</code> (the correct one for shells)</li>
+    </ul>
+  </li>
+  <li><strong>Conflicting PowerShell Profiles</strong>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">Microsoft.PowerShell_profile.ps1</code> (VS Code host)</li>
+      <li>Another profile with a valid <code class="language-plaintext highlighter-rouge">conda init</code> block</li>
+      <li>The <em>wrong</em> profile was executing first and crashing</li>
+    </ul>
+  </li>
+  <li><strong>Broken PowerShell Hook</strong>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">conda shell.powershell hook</code> returned an empty command string</li>
+      <li><code class="language-plaintext highlighter-rouge">Invoke-Expression</code> failed as a result</li>
+    </ul>
+  </li>
+</ol>
+
+<h2 id="-what-worked-the-fix">💡 What Worked (The Fix)</h2>
+
+<h3 id="identify-hijacking">Identify Hijacking</h3>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Get-Command</span><span class="w"> </span><span class="nx">conda</span><span class="w"> </span><span class="nt">-All</span><span class="w">
+</span></code></pre></div></div>
+
+<p><img src="/assets/images/imgs/conda-hijack-alias.png" alt="Get-Command conda -All" /></p>
+
+<p><strong>Revealed</strong>:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Alias conda</code> (bad)</li>
+  <li>Multiple application entrypoints</li>
+</ul>
+
+<h3 id="remove-the-hijacking-layers">Remove the Hijacking Layers</h3>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Remove-Item</span><span class="w"> </span><span class="nx">Alias:conda</span><span class="w"> </span><span class="nt">-Force</span><span class="w"> </span><span class="nt">-ErrorAction</span><span class="w"> </span><span class="nx">SilentlyContinue</span><span class="w">
+</span><span class="n">Remove-Item</span><span class="w"> </span><span class="nx">Function:conda</span><span class="w"> </span><span class="nt">-Force</span><span class="w"> </span><span class="nt">-ErrorAction</span><span class="w"> </span><span class="nx">SilentlyContinue</span><span class="w">
+</span><span class="n">Remove-Module</span><span class="w"> </span><span class="nx">Conda</span><span class="w"> </span><span class="nt">-Force</span><span class="w"> </span><span class="nt">-ErrorAction</span><span class="w"> </span><span class="nx">SilentlyContinue</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Confirmed clean state:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Get-Command</span><span class="w"> </span><span class="nx">conda</span><span class="w"> </span><span class="nt">-All</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Only <code class="language-plaintext highlighter-rouge">Application</code> entries should remain.</p>
+
+<h3 id="verify-conda-itself-works">Verify Conda Itself Works</h3>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&amp;</span><span class="w"> </span><span class="s2">"C:\Users\oneps\anaconda3\condabin\conda.bat"</span><span class="w"> </span><span class="nt">--version</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Output:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">conda</span><span class="w"> </span><span class="nx">24.11.3</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This confirmed Conda was healthy — only the shell integration was broken.</p>
+
+<h2 id="recommended-workflow-going-forward">Recommended Workflow Going Forward</h2>
+
+<ul>
+  <li>Use conda run for scripts and notebooks</li>
+  <li>Use explicit interpreter paths in VS Code</li>
+  <li>Avoid relying on conda init in PowerShell</li>
+  <li>Keep environments modular (ds_light, nlp_env, dl_env)</li>
+  <li>Export with –from-history for reproducibility</li>
+  <li>Use command prompt <code class="language-plaintext highlighter-rouge">cmd</code> if needed, since it’s native to Windows</li>
+</ul>
+
+<h3 id="stable-working-pattern">Stable Working Pattern</h3>
+
+<h3 id="use-conda-run-instead-of-activation">Use <code class="language-plaintext highlighter-rouge">conda run</code> instead of activation</h3>
+
+<p>This avoids PowerShell activation entirely and is <strong>CI/CD friendly</strong>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda run <span class="nt">-n</span> ai_marketing python <span class="nt">-V</span>
+</code></pre></div></div>
+
+<h3 id="export-environments-without-activating">Export environments without activating</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda <span class="nb">env export</span> <span class="nt">-n</span> ai_marketing <span class="nt">--from-history</span> <span class="nt">--no-builds</span> <span class="o">&gt;</span> ai_marketing_env.yml
+</code></pre></div></div>
+
+<p>This produces a clean, portable environment file.</p>
+
+<h2 id="cicd-example-snippet">CI/CD Example snippet</h2>
+
+<p>Example usage with GitHub Actions:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># GitHub Actions example</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run script in Conda env</span>
+  <span class="na">run</span><span class="pi">:</span> <span class="s">conda run -n ai_marketing python train.py</span>
+</code></pre></div></div>
+
+<h2 id="-optional-stabilize-powershell-permanently">🔒 Optional: Stabilize PowerShell Permanently</h2>
+
+<p>Add this to the <strong>top</strong> of the PowerShell profile used by VS Code:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># --- Stabilize Conda in PowerShell / VS Code ---</span><span class="w">
+</span><span class="n">Remove-Item</span><span class="w"> </span><span class="nx">Alias:conda</span><span class="w"> </span><span class="nt">-Force</span><span class="w"> </span><span class="nt">-ErrorAction</span><span class="w"> </span><span class="nx">SilentlyContinue</span><span class="w">
+</span><span class="n">Remove-Item</span><span class="w"> </span><span class="nx">Function:conda</span><span class="w"> </span><span class="nt">-Force</span><span class="w"> </span><span class="nt">-ErrorAction</span><span class="w"> </span><span class="nx">SilentlyContinue</span><span class="w">
+</span><span class="n">Remove-Module</span><span class="w"> </span><span class="nx">Conda</span><span class="w"> </span><span class="nt">-Force</span><span class="w"> </span><span class="nt">-ErrorAction</span><span class="w"> </span><span class="nx">SilentlyContinue</span><span class="w">
+
+</span><span class="c"># Force the correct Windows entrypoint</span><span class="w">
+</span><span class="n">Set-Alias</span><span class="w"> </span><span class="nx">conda</span><span class="w"> </span><span class="s2">"C:\Users\oneps\anaconda3\condabin\conda.bat"</span><span class="w">
+</span></code></pre></div></div>
+
+<blockquote>
+  <p>Note: This process prevents Conda from being hijacked again, but is less optimal.</p>
+</blockquote>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ul>
+  <li>Conda on Windows has <strong>multiple valid entrypoints</strong></li>
+  <li>PowerShell activation depends on fragile shell hooks</li>
+  <li>VS Code often loads a different PowerShell profile than expected</li>
+  <li><code class="language-plaintext highlighter-rouge">conda run</code> is the <strong>most reliable and modern workflow</strong></li>
+  <li>Avoid developing directly in <code class="language-plaintext highlighter-rouge">base</code></li>
+  <li>Prefer reproducible, activation-free commands</li>
+</ul>
+
+<h2 id="-final-state">🏁 Final State</h2>
+
+<p>You now have:</p>
+
+<ul>
+  <li>✅ A working Conda installation</li>
+  <li>✅ Clean environment exports</li>
+  <li>✅ A PowerShell setup that won’t break on restart</li>
+  <li>✅ A DevOps-aligned workflow suitable for scripting and CI</li>
+</ul>
+
+<p>This is a classic Windows + Conda rite of passage — and it’s now fully documented.</p>
+
+<hr />
+
+<p><strong>Data Inside Data™</strong>.</p>
+
+<p><em>Tech Hands, a science Mind, and a Heart for Community™.</em></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2026-08-01T11:30:50+00:00">August 1, 2026</time></p>
+
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="#" class="pagination--pager disabled">Previous</a>
+    
+    
+      <a href="/did-builder-showcase-staging/fixes/python-eol-conda-migration-fix/" class="pagination--pager" title="Migrating an End-of-Life Python Kernel (3.8 / 3.9 → 3.10+)">Next</a>
+    
+  </nav>
+
+
+    </div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+      
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <footer class="page__footer" role="contentinfo">
+  <div class="page__footer-inner">
+    <div class="page__footer-grid">
+
+      <!-- LEFT: Title + email + quick links -->
+      <div class="page__footer-col">
+        <h2 class="page__footer-title">DataInsideData™ Staging</h2>
+
+        
+          <p class="page__footer-email">
+            <a href="mailto:contact@datainsidedata.com">contact@datainsidedata.com</a>
+          </p>
+        
+
+    <ul class="page__footer-quicklinks">
+     
+    <li>
+      <a href="/did-builder-showcase-staging/archive/">Archive</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/sitemap.xml">Sitemap</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/feed.xml">RSS</a>
+    </li>
+        
+     </ul>
+
+      </div>
+
+      <!-- MIDDLE: Social links (MM style) -->
+      <div class="page__footer-col">
+        <div class="page__footer-follow">
+          <ul class="social-icons">
+            
+              
+                
+                  <li>
+                    <a href="https://github.com/dataeden" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-github" aria-hidden="true"></i>
+                      <span class="label">GitHub</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="mailto:contact@datainsidedata.com" rel="nofollow noopener noreferrer">
+                      <i class="fas fa-fw fa-envelope" aria-hidden="true"></i>
+                      <span class="label">Email</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="https://www.linkedin.com/" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-linkedin" aria-hidden="true"></i>
+                      <span class="label">LinkedIn</span>
+                    </a>
+                  </li>
+                
+              
+            
+
+            
+              <li>
+                <a href="/did-builder-showcase-staging/feed.xml">
+                  <i class="fas fa-fw fa-rss-square" aria-hidden="true"></i>
+                  <span class="label">Feed</span>
+                </a>
+              </li>
+            
+          </ul>
+        </div>
+      </div>
+
+      <!-- RIGHT: Description -->
+      <div class="page__footer-col">
+        
+          <p class="page__footer-desc">Staging preview for DataInsideData™ and Builder Showcase testing.</p>
+        
+      </div>
+
+    </div>
+
+    <!-- Footer bottom bar (your DID style) -->
+    <div class="footer-bottom">
+      <p class="footer-bottom__copyright">
+        © 2026 Data Inside Data™. All rights reserved.
+      </p>
+
+      <p class="footer-bottom__powered">
+        Powered by
+        <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>,
+        <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a>, and
+        <a href="https://aws.amazon.com/route53/" target="_blank" rel="noopener">AWS Route 53</a>.
+      </p>
+
+      <p class="footer-bottom__legal">
+        <a href="/did-builder-showcase-staging/privacy/">Privacy Policy</a>
+        <span class="footer-bottom__sep">•</span>
+        <a href="/did-builder-showcase-staging/terms/">Terms of Use</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+      </footer>
+    </div>
+
+    
+  <script src="/did-builder-showcase-staging/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr.min.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-store.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+  
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  
+    <script src="/did-builder-showcase-staging/assets/js/mermaid-init.js"></script>
+  
+
+
+  </body>
+</html>

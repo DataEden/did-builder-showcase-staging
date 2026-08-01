@@ -1,0 +1,838 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.27.1 by Michael Rose
+  Copyright 2013-2025 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Part 2: Building a Secure Submission Pipeline with Jekyll, Supabase Edge Function, and Postgres - DataInsideData™ Staging</title>
+<meta name="description" content="A practical build log and how-to for wiring a static Jekyll form into a Supabase Edge Function that validates payloads and inserts submissions into Postgres.">
+
+
+  <meta name="author" content="Fari Lindo">
+  
+  <meta property="article:author" content="Fari Lindo">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="DataInsideData™ Staging">
+<meta property="og:title" content="Part 2: Building a Secure Submission Pipeline with Jekyll, Supabase Edge Function, and Postgres">
+<meta property="og:url" content="https://dataeden.github.io/did-builder-showcase-staging/how-tos/2-supabase-ingestion-how-to/">
+
+
+  <meta property="og:description" content="A practical build log and how-to for wiring a static Jekyll form into a Supabase Edge Function that validates payloads and inserts submissions into Postgres.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2026-08-01T11:30:50+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="https://dataeden.github.io/did-builder-showcase-staging/how-tos/2-supabase-ingestion-how-to/">
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/did-builder-showcase-staging/feed.xml" type="application/atom+xml" rel="alternate" title="DataInsideData™ Staging Feed">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+  
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/did-builder-showcase-staging/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css"></noscript>
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/did-builder-showcase-staging/assets/images/imgs/apple-touch-icon-180.png">
+
+<link rel="icon" type="image/png" href="/did-builder-showcase-staging/assets/images/imgs/site-icon-512.png">
+
+<link rel="icon" type="image/x-icon" href="/did-builder-showcase-staging/assets/images/imgs/favicon.ico">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/did-builder-showcase-staging/assets/images/imgs/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/did-builder-showcase-staging/assets/images/imgs/favicon-16.png">
+
+
+  </head>
+
+  <body class="layout--single" dir="ltr">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/did-builder-showcase-staging/"><img src="/did-builder-showcase-staging/assets/images/logos/FuturisticBrand.png" alt="DataInsideData™ Staging"></a>
+        
+        <a class="site-title" href="/did-builder-showcase-staging/">
+          DataInsideData™ Staging
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/"
+                
+                
+              >Start Here</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/blog/"
+                
+                
+              >Posts</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/projects/"
+                
+                
+              >Projects</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/how-tos/"
+                
+                
+              >How Tos</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/fixes/"
+                
+                
+              >Fixes</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/about/"
+                
+                
+              >About</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/contact/"
+                
+                
+              >Contact</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+    
+      <nav class="nav__list">
+  
+  <input id="ac-toc" name="accordion-toc" type="checkbox" />
+  <label for="ac-toc">Toggle Menu</label>
+  <ul class="nav__items">
+    
+      
+      
+    
+  </ul>
+</nav>
+
+    
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Part 2: Building a Secure Submission Pipeline with Jekyll, Supabase Edge Function, and Postgres">
+    <meta itemprop="description" content="A practical build log and how-to for wiring a static Jekyll form into a Supabase Edge Function that validates payloads and inserts submissions into Postgres.">
+    <meta itemprop="datePublished" content="2026-08-01T11:30:50+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">
+            <a href="https://dataeden.github.io/did-builder-showcase-staging/how-tos/2-supabase-ingestion-how-to/" itemprop="url">Part 2: Building a Secure Submission Pipeline with Jekyll, Supabase Edge Function, and Postgres
+</a>
+          </h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          4 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-database"></i> Technical Breakdown</h4></header>
+              <ul class="toc__menu"><li><a href="#testing-direct-inserts-from-notebook">Testing Direct Inserts from Notebook</a><ul><li><a href="#setting-up-reading-data-with-sqlalchemy">Setting up Reading Data with SQLAlchemy</a></li></ul></li><li><a href="#running-supabase-cli-from-a-notebook">Running Supabase CLI from a Notebook</a><ul><li><a href="#supabase-personal-access-token">Supabase Personal Access Token</a></li></ul></li><li><a href="#finding-the-supabase-project-ref">Finding the Supabase Project Ref</a><ul><li><a href="#initializing-and-linking-supabase-locally">Initializing and Linking Supabase Locally</a></li></ul></li><li><a href="#function-configuration">Function Configuration</a><ul><li><a href="#deno-config-clarification">Deno Config Clarification</a></li><li><a href="#setting-supabase-function-secrets">Setting Supabase Function Secrets</a></li></ul></li><li><a href="#frontend-submit-form">Frontend Submit Form</a><ul><li><a href="#frontend-fetch-request">Frontend Fetch Request</a></li><li><a href="#minimal-edge-function">Minimal Edge Function</a></li></ul></li></ul>
+            </nav>
+          </aside>
+        
+        <blockquote>
+  <p>This section is Part 2 of the secure submission pipeline breakdown.</p>
+</blockquote>
+
+<h2 id="testing-direct-inserts-from-notebook">Testing Direct Inserts from Notebook</h2>
+
+<p>Before wiring the Edge Function, a manual Python payload was inserted through <code class="language-plaintext highlighter-rouge">inspect</code> browser tool and <code class="language-plaintext highlighter-rouge">psycopg2</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">"</span><span class="s">first_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Fari</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">last_name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Lindo</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">submitter_email</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">test@example.com</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">github_username</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">dataeden</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">repo_url</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">https://github.com/DataEden/fari-tech-portfolio</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">project_title</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">AI Review Sentiment Labeling Pipeline</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">project_category</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">AI &amp; Decision Systems</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">project_description</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Testing direct psycopg2 insert workflow before Edge Function integration.</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">project_tags</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">Python</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">OpenAI</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Supabase</span><span class="sh">"</span><span class="p">],</span>
+    <span class="sh">"</span><span class="s">live_url</span><span class="sh">"</span><span class="p">:</span> <span class="sh">""</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">readme_url</span><span class="sh">"</span><span class="p">:</span> <span class="sh">""</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">owns_or_has_permission</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">wants_public_showcase</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The successful insertion confirmed the database table accepted the intended payload shape.</p>
+
+<p>I was now sure that the form submission was ready for testing.</p>
+
+<h3 id="setting-up-reading-data-with-sqlalchemy">Setting up Reading Data with SQLAlchemy</h3>
+
+<p>A Pandas warning appeared when using a raw <code class="language-plaintext highlighter-rouge">psycopg2</code> connection with <code class="language-plaintext highlighter-rouge">pd.read_sql_query()</code>.</p>
+
+<p>The cleaner approach used SQLAlchemy:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">sqlalchemy</span> <span class="kn">import</span> <span class="n">create_engine</span>
+<span class="kn">from</span> <span class="n">sqlalchemy.engine</span> <span class="kn">import</span> <span class="n">URL</span>
+
+<span class="k">def</span> <span class="nf">get_supabase_engine</span><span class="p">():</span>
+    <span class="n">database_url</span> <span class="o">=</span> <span class="n">URL</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span>
+        <span class="n">drivername</span><span class="o">=</span><span class="sh">"</span><span class="s">postgresql+psycopg2</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">username</span><span class="o">=</span><span class="n">os</span><span class="p">.</span><span class="nf">getenv</span><span class="p">(</span><span class="sh">"</span><span class="s">SUPABASE_DB_USER</span><span class="sh">"</span><span class="p">),</span>
+        <span class="n">password</span><span class="o">=</span><span class="n">os</span><span class="p">.</span><span class="nf">getenv</span><span class="p">(</span><span class="sh">"</span><span class="s">SUPABASE_DB_PASSWORD</span><span class="sh">"</span><span class="p">),</span>
+        <span class="n">host</span><span class="o">=</span><span class="n">os</span><span class="p">.</span><span class="nf">getenv</span><span class="p">(</span><span class="sh">"</span><span class="s">SUPABASE_DB_HOST</span><span class="sh">"</span><span class="p">),</span>
+        <span class="n">port</span><span class="o">=</span><span class="nf">int</span><span class="p">(</span><span class="n">os</span><span class="p">.</span><span class="nf">getenv</span><span class="p">(</span><span class="sh">"</span><span class="s">SUPABASE_DB_PORT</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">5432</span><span class="sh">"</span><span class="p">)),</span>
+        <span class="n">database</span><span class="o">=</span><span class="n">os</span><span class="p">.</span><span class="nf">getenv</span><span class="p">(</span><span class="sh">"</span><span class="s">SUPABASE_DB_NAME</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">postgres</span><span class="sh">"</span><span class="p">),</span>
+        <span class="n">query</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">sslmode</span><span class="sh">"</span><span class="p">:</span> <span class="n">os</span><span class="p">.</span><span class="nf">getenv</span><span class="p">(</span><span class="sh">"</span><span class="s">SUPABASE_DB_SSLMODE</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">require</span><span class="sh">"</span><span class="p">)},</span>
+    <span class="p">)</span>
+
+    <span class="n">engine</span> <span class="o">=</span> <span class="nf">create_engine</span><span class="p">(</span>
+        <span class="n">database_url</span><span class="p">,</span>
+        <span class="n">pool_pre_ping</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">pool_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">max_overflow</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">engine</span>
+</code></pre></div></div>
+
+<p>Reusable read helper:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">read_supabase_df</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="bp">None</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="nf">get_supabase_engine</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nf">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span>
+
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">.</span><span class="nf">dispose</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="running-supabase-cli-from-a-notebook">Running Supabase CLI from a Notebook</h2>
+
+<p>The local terminal did not recognize.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>supabase <span class="nt">--help</span>
+</code></pre></div></div>
+
+<p>because the CLI was not globally installed.</p>
+
+<p>Instead, <code class="language-plaintext highlighter-rouge">npx</code> worked:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx supabase <span class="nt">--help</span>
+</code></pre></div></div>
+
+<p>From working notebook:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">subprocess</span>
+<span class="kn">from</span> <span class="n">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">PROJECT_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">.</span><span class="nf">cwd</span><span class="p">().</span><span class="n">parent</span> <span class="k">if</span> <span class="n">Path</span><span class="p">.</span><span class="nf">cwd</span><span class="p">().</span><span class="n">name</span> <span class="o">==</span> <span class="sh">"</span><span class="s">notebooks</span><span class="sh">"</span> <span class="k">else</span> <span class="n">Path</span><span class="p">.</span><span class="nf">cwd</span><span class="p">()</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">npx supabase --help</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">cwd</span><span class="o">=</span><span class="n">PROJECT_ROOT</span><span class="p">,</span>
+    <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">capture_output</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">text</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">stdout</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">stderr</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This confirmed the Supabase CLI was available through <code class="language-plaintext highlighter-rouge">npx</code>.</p>
+
+<h3 id="supabase-personal-access-token">Supabase Personal Access Token</h3>
+
+<p>The project API key was <strong>not</strong> the same as the CLI access token.</p>
+
+<p>Wrong token type:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sb_publishable_...
+</code></pre></div></div>
+
+<p>Correct CLI token type:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sbp_...
+</code></pre></div></div>
+
+<p>The personal access token came from:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Supabase Dashboard
+    → Account / User Settings
+    → Access Tokens
+</code></pre></div></div>
+
+<p>Then, inside the notebook:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">os</span>
+<span class="kn">from</span> <span class="n">getpass</span> <span class="kn">import</span> <span class="n">getpass</span>
+
+<span class="n">token</span> <span class="o">=</span> <span class="nf">getpass</span><span class="p">(</span><span class="sh">"</span><span class="s">Paste Supabase personal access token, starts with sbp_: </span><span class="sh">"</span><span class="p">)</span>
+<span class="n">os</span><span class="p">.</span><span class="n">environ</span><span class="p">[</span><span class="sh">"</span><span class="s">SUPABASE_ACCESS_TOKEN</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">token</span>
+</code></pre></div></div>
+
+<p>Then:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">subprocess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">npx supabase projects list</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">cwd</span><span class="o">=</span><span class="n">PROJECT_ROOT</span><span class="p">,</span>
+    <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">check</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="finding-the-supabase-project-ref">Finding the Supabase Project Ref</h2>
+
+<p>The project ref can be found in:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://supabase.com/dashboard/project/THE_PROJECT_REF
+</code></pre></div></div>
+
+<p>or from the project URL:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://THE_PROJECT_REF.supabase.co
+</code></pre></div></div>
+
+<p>In this build, the function URL followed this pattern:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://PROJECT_REF.supabase.co/functions/v1/submit-builder-project
+</code></pre></div></div>
+
+<h3 id="initializing-and-linking-supabase-locally">Initializing and Linking Supabase Locally</h3>
+
+<p>Commands:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx supabase init
+npx supabase <span class="nb">link</span> <span class="nt">--project-ref</span> PROJECT_REF
+</code></pre></div></div>
+
+<p>Then the function was created:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx supabase functions new submit-builder-project
+</code></pre></div></div>
+
+<p>This generated:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>supabase/
+└── functions/
+    └── submit-builder-project/
+        └── index.ts
+</code></pre></div></div>
+
+<p>The CLI also generated Deno-related VS Code settings.</p>
+
+<h2 id="function-configuration">Function Configuration</h2>
+
+<p>In:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>supabase/config.toml
+</code></pre></div></div>
+
+<p>The function was configured:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">[</span><span class="n">functions</span><span class="k">.</span><span class="n">submit-builder-project</span><span class="k">]</span>
+<span class="n">verify_jwt</span> <span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+</code></pre></div></div>
+
+<p>Why?</p>
+
+<p>The frontend is using the newer <code class="language-plaintext highlighter-rouge">sb_publishable_...</code> key in the <code class="language-plaintext highlighter-rouge">apikey</code> header, not a Supabase Auth JWT.</p>
+
+<p>With this setup, the platform JWT check is skipped, and the Edge Function itself performs validation and key-header checking.</p>
+
+<p>Important:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>verify_jwt = false means the function code becomes the gatekeeper.
+</code></pre></div></div>
+
+<p>That is why the function includes:</p>
+
+<ul>
+  <li>POST-only check</li>
+  <li>API key header check</li>
+  <li>CORS allowlist</li>
+  <li>required-field validation</li>
+  <li>max-length checks</li>
+  <li>GitHub URL validation</li>
+  <li>honeypot field</li>
+  <li>server-side database insert only</li>
+</ul>
+
+<hr />
+
+<h3 id="deno-config-clarification">Deno Config Clarification</h3>
+
+<p>The generated <code class="language-plaintext highlighter-rouge">deno.json</code> looked like:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"imports"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"@supabase/functions-js"</span><span class="p">:</span><span class="w"> </span><span class="s2">"jsr:@supabase/functions-js@^2"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This file is for Deno imports/tooling.</p>
+
+<p><em>Quick note</em>: Credentials do <strong>not</strong> go in <code class="language-plaintext highlighter-rouge">deno.json</code>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Deno.env.get(...)</code> reads Edge Function environment variables/secrets, not <code class="language-plaintext highlighter-rouge">deno.json</code>.</p>
+
+<p>Example from <code class="language-plaintext highlighter-rouge">index.ts</code>:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">expectedPublicKey</span> <span class="o">=</span> <span class="nx">Deno</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">DID_PUBLIC_FORM_KEY</span><span class="dl">"</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">writeKey</span> <span class="o">=</span> <span class="nx">Deno</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">DID_SUPABASE_WRITE_KEY</span><span class="dl">"</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h3 id="setting-supabase-function-secrets">Setting Supabase Function Secrets</h3>
+
+<p>The function expects:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DID_PUBLIC_FORM_KEY
+DID_SUPABASE_WRITE_KEY
+</code></pre></div></div>
+
+<p>The public form key matches the browser-facing publishable key:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx supabase secrets <span class="nb">set </span><span class="nv">DID_PUBLIC_FORM_KEY</span><span class="o">=</span><span class="s2">"sb_publishable_PUBLIC_KEY"</span>
+</code></pre></div></div>
+
+<p>The backend write key is a server-side secret/service key:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx supabase secrets <span class="nb">set </span><span class="nv">DID_SUPABASE_WRITE_KEY</span><span class="o">=</span><span class="s2">"SECRET_OR_SERVICE_ROLE_KEY"</span>
+</code></pre></div></div>
+
+<p>Be sure to <strong>not</strong> put the backend write key in:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit.md
+Jekyll config
+_data files
+public repository
+browser JavaScript
+</code></pre></div></div>
+
+<p>As this may lead to undesirable or catastrophic security outcomes.</p>
+
+<h2 id="frontend-submit-form">Frontend Submit Form</h2>
+
+<p>The Jekyll page was:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>projects/builder-showcase/submit.md
+</code></pre></div></div>
+
+<p>Some of the collected form fields:</p>
+
+<ul>
+  <li>first name</li>
+  <li>last name</li>
+  <li>email</li>
+  <li>GitHub username</li>
+  <li>repo URL</li>
+  <li>project title</li>
+  <li>project category</li>
+  <li>honeypot field</li>
+</ul>
+
+<p>Example frontend script builds a payload:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">payload</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">first_name</span><span class="p">:</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">first_name</span><span class="dl">"</span><span class="p">),</span>
+  <span class="na">last_name</span><span class="p">:</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">last_name</span><span class="dl">"</span><span class="p">),</span>
+  <span class="na">submitter_email</span><span class="p">:</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">submitter_email</span><span class="dl">"</span><span class="p">),</span>
+  <span class="na">github_username</span><span class="p">:</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">github_username</span><span class="dl">"</span><span class="p">),</span>
+  <span class="na">repo_url</span><span class="p">:</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">repo_url</span><span class="dl">"</span><span class="p">),</span>
+  <span class="na">project_title</span><span class="p">:</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">project_title</span><span class="dl">"</span><span class="p">),</span>
+  <span class="na">project_category</span><span class="p">:</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">project_category</span><span class="dl">"</span><span class="p">),</span>
+  <span class="na">project_description</span><span class="p">:</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">project_description</span><span class="dl">"</span><span class="p">),</span>
+  <span class="na">live_url</span><span class="p">:</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">live_url</span><span class="dl">"</span><span class="p">),</span>
+  <span class="na">readme_url</span><span class="p">:</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">readme_url</span><span class="dl">"</span><span class="p">),</span>
+  <span class="na">owns_or_has_permission</span><span class="p">:</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">owns_or_has_permission</span><span class="dl">"</span><span class="p">)</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">on</span><span class="dl">"</span><span class="p">,</span>
+  <span class="na">wants_public_showcase</span><span class="p">:</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">wants_public_showcase</span><span class="dl">"</span><span class="p">)</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">on</span><span class="dl">"</span><span class="p">,</span>
+  <span class="na">website</span><span class="p">:</span> <span class="nx">formData</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">website</span><span class="dl">"</span><span class="p">)</span> <span class="o">||</span> <span class="dl">""</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h3 id="frontend-fetch-request">Frontend Fetch Request</h3>
+
+<p>The first working test used hardcoded values in <code class="language-plaintext highlighter-rouge">submit.md</code>:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">FUNCTION_URL</span> <span class="o">=</span>
+  <span class="dl">"</span><span class="s2">https://PROJECT_REF.supabase.co/functions/v1/submit-builder-project</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">SUPABASE_PUBLISHABLE_KEY</span> <span class="o">=</span>
+  <span class="dl">"</span><span class="s2">sb_publishable_PUBLIC_KEY_HERE</span><span class="dl">"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>The fetch call:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="nx">FUNCTION_URL</span><span class="p">,</span> <span class="p">{</span>
+  <span class="na">method</span><span class="p">:</span> <span class="dl">"</span><span class="s2">POST</span><span class="dl">"</span><span class="p">,</span>
+  <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
+    <span class="dl">"</span><span class="s2">Content-Type</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">application/json</span><span class="dl">"</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">apikey</span><span class="dl">"</span><span class="p">:</span> <span class="nx">SUPABASE_PUBLISHABLE_KEY</span>
+  <span class="p">},</span>
+  <span class="na">body</span><span class="p">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nf">stringify</span><span class="p">(</span><span class="nx">payload</span><span class="p">)</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>This confirmed:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>submit.md
+    ↓
+Supabase Edge Function
+    ↓
+Postgres insert
+</code></pre></div></div>
+
+<p>Later, the project ref and publishable key will be moved into a Jekyll data/config include to reduce hardcoding.</p>
+
+<h3 id="minimal-edge-function">Minimal Edge Function</h3>
+
+<p>The first function version was intentionally insert-only.</p>
+
+<p>It did <strong>not</strong> fetch GitHub README content yet.</p>
+
+<p>Responsibilities:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST only
+CORS headers
+apikey header check
+payload validation
+tag normalization
+honeypot check
+insert into builder_project_submissions
+return inserted id/status
+</code></pre></div></div>
+
+<p>Key environment variables:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">expectedPublicKey</span> <span class="o">=</span> <span class="nx">Deno</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">DID_PUBLIC_FORM_KEY</span><span class="dl">"</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">writeKey</span> <span class="o">=</span> <span class="nx">Deno</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="dl">"</span><span class="s2">DID_SUPABASE_WRITE_KEY</span><span class="dl">"</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>The database insert:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="p">{</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">error</span> <span class="p">}</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">supabaseAdmin</span>
+  <span class="p">.</span><span class="k">from</span><span class="p">(</span><span class="dl">"</span><span class="s2">builder_project_submissions</span><span class="dl">"</span><span class="p">)</span>
+  <span class="p">.</span><span class="nf">insert</span><span class="p">(</span><span class="nx">submissionRow</span><span class="p">)</span>
+  <span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="dl">"</span><span class="s2">id, status, readme_fetch_status, created_at</span><span class="dl">"</span><span class="p">)</span>
+  <span class="p">.</span><span class="nf">single</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>Check out <a href="/did-builder-showcase-staging/how-tos/3-supabase-ingestion-how-to/">Part 3 here</a>.</p>
+
+<hr />
+
+<p><em>Data Inside Data™</em>.</p>
+
+<p><em>Tech Hands, a Science Mind, and a Heart for Community</em>.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2026-08-01T11:30:50+00:00">August 1, 2026</time></p>
+
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/did-builder-showcase-staging/how-tos/2-git-worktree-workflow-guide-datainsidedata/" class="pagination--pager" title="Part 2: How to Create Git Worktrees and Manage Multiple Branches">Previous</a>
+    
+    
+      <a href="/did-builder-showcase-staging/how-tos/3-supabase-ingestion-how-to/" class="pagination--pager" title="Part 3: Building a Secure Submission Pipeline with Jekyll, Supabase Edge Function, and Postgres">Next</a>
+    
+  </nav>
+
+
+    </div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+      
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <footer class="page__footer" role="contentinfo">
+  <div class="page__footer-inner">
+    <div class="page__footer-grid">
+
+      <!-- LEFT: Title + email + quick links -->
+      <div class="page__footer-col">
+        <h2 class="page__footer-title">DataInsideData™ Staging</h2>
+
+        
+          <p class="page__footer-email">
+            <a href="mailto:contact@datainsidedata.com">contact@datainsidedata.com</a>
+          </p>
+        
+
+    <ul class="page__footer-quicklinks">
+     
+    <li>
+      <a href="/did-builder-showcase-staging/archive/">Archive</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/sitemap.xml">Sitemap</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/feed.xml">RSS</a>
+    </li>
+        
+     </ul>
+
+      </div>
+
+      <!-- MIDDLE: Social links (MM style) -->
+      <div class="page__footer-col">
+        <div class="page__footer-follow">
+          <ul class="social-icons">
+            
+              
+                
+                  <li>
+                    <a href="https://github.com/dataeden" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-github" aria-hidden="true"></i>
+                      <span class="label">GitHub</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="mailto:contact@datainsidedata.com" rel="nofollow noopener noreferrer">
+                      <i class="fas fa-fw fa-envelope" aria-hidden="true"></i>
+                      <span class="label">Email</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="https://www.linkedin.com/" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-linkedin" aria-hidden="true"></i>
+                      <span class="label">LinkedIn</span>
+                    </a>
+                  </li>
+                
+              
+            
+
+            
+              <li>
+                <a href="/did-builder-showcase-staging/feed.xml">
+                  <i class="fas fa-fw fa-rss-square" aria-hidden="true"></i>
+                  <span class="label">Feed</span>
+                </a>
+              </li>
+            
+          </ul>
+        </div>
+      </div>
+
+      <!-- RIGHT: Description -->
+      <div class="page__footer-col">
+        
+          <p class="page__footer-desc">Staging preview for DataInsideData™ and Builder Showcase testing.</p>
+        
+      </div>
+
+    </div>
+
+    <!-- Footer bottom bar (your DID style) -->
+    <div class="footer-bottom">
+      <p class="footer-bottom__copyright">
+        © 2026 Data Inside Data™. All rights reserved.
+      </p>
+
+      <p class="footer-bottom__powered">
+        Powered by
+        <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>,
+        <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a>, and
+        <a href="https://aws.amazon.com/route53/" target="_blank" rel="noopener">AWS Route 53</a>.
+      </p>
+
+      <p class="footer-bottom__legal">
+        <a href="/did-builder-showcase-staging/privacy/">Privacy Policy</a>
+        <span class="footer-bottom__sep">•</span>
+        <a href="/did-builder-showcase-staging/terms/">Terms of Use</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+      </footer>
+    </div>
+
+    
+  <script src="/did-builder-showcase-staging/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr.min.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-store.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+  
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  
+    <script src="/did-builder-showcase-staging/assets/js/mermaid-init.js"></script>
+  
+
+
+  </body>
+</html>

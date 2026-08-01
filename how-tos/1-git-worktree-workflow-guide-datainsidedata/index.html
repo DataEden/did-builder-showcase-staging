@@ -1,0 +1,917 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.27.1 by Michael Rose
+  Copyright 2013-2025 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Part 1: How to Create Git Worktrees and Manage Multiple Branches - DataInsideData™ Staging</title>
+<meta name="description" content="A practical guide to using Git worktrees for cleaner branch management, safer development, and more organized project workflows.">
+
+
+  <meta name="author" content="Fari Lindo">
+  
+  <meta property="article:author" content="Fari Lindo">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="DataInsideData™ Staging">
+<meta property="og:title" content="Part 1: How to Create Git Worktrees and Manage Multiple Branches">
+<meta property="og:url" content="https://dataeden.github.io/did-builder-showcase-staging/how-tos/1-git-worktree-workflow-guide-datainsidedata/">
+
+
+  <meta property="og:description" content="A practical guide to using Git worktrees for cleaner branch management, safer development, and more organized project workflows.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2026-08-01T11:30:50+00:00">
+
+
+
+
+
+
+<link rel="canonical" href="https://dataeden.github.io/did-builder-showcase-staging/how-tos/1-git-worktree-workflow-guide-datainsidedata/">
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/did-builder-showcase-staging/feed.xml" type="application/atom+xml" rel="alternate" title="DataInsideData™ Staging Feed">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+  
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/did-builder-showcase-staging/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@latest/css/all.min.css"></noscript>
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/did-builder-showcase-staging/assets/images/imgs/apple-touch-icon-180.png">
+
+<link rel="icon" type="image/png" href="/did-builder-showcase-staging/assets/images/imgs/site-icon-512.png">
+
+<link rel="icon" type="image/x-icon" href="/did-builder-showcase-staging/assets/images/imgs/favicon.ico">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/did-builder-showcase-staging/assets/images/imgs/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/did-builder-showcase-staging/assets/images/imgs/favicon-16.png">
+
+
+  </head>
+
+  <body class="layout--single" dir="ltr">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/did-builder-showcase-staging/"><img src="/did-builder-showcase-staging/assets/images/logos/FuturisticBrand.png" alt="DataInsideData™ Staging"></a>
+        
+        <a class="site-title" href="/did-builder-showcase-staging/">
+          DataInsideData™ Staging
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/"
+                
+                
+              >Start Here</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/blog/"
+                
+                
+              >Posts</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/projects/"
+                
+                
+              >Projects</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/how-tos/"
+                
+                
+              >How Tos</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/fixes/"
+                
+                
+              >Fixes</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/about/"
+                
+                
+              >About</a>
+            </li><li class="masthead__menu-item">
+              <a
+                href="/did-builder-showcase-staging/contact/"
+                
+                
+              >Contact</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <i class="fas fa-search"></i>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+      
+      
+      
+    
+    
+      <nav class="nav__list">
+  
+  <input id="ac-toc" name="accordion-toc" type="checkbox" />
+  <label for="ac-toc">Toggle Menu</label>
+  <ul class="nav__items">
+    
+      
+      
+    
+  </ul>
+</nav>
+
+    
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Part 1: How to Create Git Worktrees and Manage Multiple Branches">
+    <meta itemprop="description" content="A practical guide to using Git worktrees for cleaner branch management, safer development, and more organized project workflows.">
+    <meta itemprop="datePublished" content="2026-08-01T11:30:50+00:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">
+            <a href="https://dataeden.github.io/did-builder-showcase-staging/how-tos/1-git-worktree-workflow-guide-datainsidedata/" itemprop="url">Part 1: How to Create Git Worktrees and Manage Multiple Branches
+</a>
+          </h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          6 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-code-branch"></i> Git Breakdown</h4></header>
+              <ul class="toc__menu"><li><a href="#overview">Overview</a><ul><li><a href="#situation">Situation</a></li></ul></li><li><a href="#task">Task</a><ul><li><a href="#what-a-working-tree-means">What a Working Tree Means</a></li><li><a href="#what-git-worktree-adds">What Git Worktree Adds</a></li><li><a href="#why-this-works">Why This Works</a></li><li><a href="#important-mental-model">Important Mental Model</a></li><li><a href="#copypasting-folders">Copy/Pasting Folders</a></li><li><a href="#check-existing-worktrees">Check Existing Worktrees</a></li><li><a href="#create-a-worktree-for-an-existing-local-branch">Create a Worktree for an Existing Local Branch</a></li><li><a href="#open-a-worktree-in-vs-code">Open a Worktree in VS Code</a></li><li><a href="#create-a-new-branch-and-worktree-together">Create a New Branch and Worktree Together</a></li><li><a href="#create-a-worktree-from-a-remote-branch">Create a Worktree from a Remote Branch</a></li><li><a href="#important-rule-about-branches-and-worktrees">Important Rule About Branches and Worktrees</a></li><li><a href="#suggested-folder-layout">Suggested Folder Layout</a></li><li><a href="#datainsidedata-branch-map">DataInsideData Branch Map</a></li><li><a href="#recommended-worktree-setup-commands">Recommended Worktree Setup Commands</a></li><li><a href="#working-in-a-feature-worktree">Working in a Feature Worktree</a></li><li><a href="#worktree-and-ignored-files">Worktree and Ignored Files</a></li><li><a href="#worktree-and-generated-files">Worktree and Generated Files</a></li><li><a href="#worktree-and-dependencies">Worktree and Dependencies</a></li></ul></li></ul>
+            </nav>
+          </aside>
+        
+        <blockquote>
+  <p>Part 1 Git Worktree guide.</p>
+</blockquote>
+
+<h2 id="overview">Overview</h2>
+
+<p>This guide documents how <code class="language-plaintext highlighter-rouge">git worktree</code> can make a multi-branch workflow cleaner, safer, and easier to reason about.</p>
+
+<p>The core problem was that I was switching between several active branches inside one local folder. Each branch had different files, different build outputs, different staging needs, and different responsibilities.</p>
+
+<p>That created confusion because the same folder kept changing shape every time I switched branches.</p>
+
+<p>A more reasonable model is to let each major branch have its own working folder.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>one Git repository
+→ multiple working folders
+→ each folder can stand on a different branch
+→ less switching issues
+→ cleaner testing and deployment workflow
+</code></pre></div></div>
+
+<h3 id="situation">Situation</h3>
+
+<p>I was working across several active branches in the private DataInsideData repo:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>main
+→ stable base branch
+
+feat/add-post
+→ posts, how-tos, and fixes content
+
+feat/builder-staging
+→ staging deploy workflow and public test site hardening
+
+integration/did-merge
+→ combined release candidate branch
+
+staging/builder-showcase-campaign
+→ public testing campaign branch 
+</code></pre></div></div>
+
+<ul>
+  <li>Switching between these branches in one folder caused extra noise.</li>
+  <li>Sometimes generated folder/files stayed behind.</li>
+  <li>Sometimes folders/files existed in one branch but not another.</li>
+  <li>Sometimes folders/files will gets deleted during branch switching.</li>
+</ul>
+
+<p>It became difficult to know whether I was looking at real branch work, generated output, ignored files, or residue from a previous checkout.</p>
+
+<h2 id="task">Task</h2>
+
+<p>I needed a cleaner way to work across multiple branches without constantly reshaping one folder.</p>
+
+<p>The goal was to create a workflow where each major branch could have its own local folder, while still sharing the same Git repository history.</p>
+
+<p>That way, I could work on posts, staging, and integration without constantly switching one working directory back and forth.</p>
+
+<h3 id="what-a-working-tree-means">What a Working Tree Means</h3>
+
+<blockquote>
+  <p>A working tree is the folder of files you are actively editing.</p>
+</blockquote>
+
+<p>When I open a repo in VS Code, I am usually looking at one working tree.</p>
+
+<p>Example:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>datainsidedata-website/
+</code></pre></div></div>
+
+<p>That folder contains the checked-out files for the branch I am currently standing on.</p>
+
+<p>When I run:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">switch</span><span class="w"> </span><span class="nx">feat/add-post</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Git changes that same folder to match the <code class="language-plaintext highlighter-rouge">feat/add-post</code> branch.</p>
+
+<p>When I run:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">switch</span><span class="w"> </span><span class="nx">feat/community-projects</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Git changes that same folder again to match the <code class="language-plaintext highlighter-rouge">feat/community-projects</code> branch.</p>
+
+<p>That works, but it can become messy when branches have very different file structures.</p>
+
+<h3 id="what-git-worktree-adds">What Git Worktree Adds</h3>
+
+<p><code class="language-plaintext highlighter-rouge">git worktree</code> lets one Git repository have multiple working folders.</p>
+
+<p>Instead of switching one folder between branches, I can create separate folders like this:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>datainsidedata-website/
+→ main or default workspace
+
+datainsidedata-add-post/
+→ feat/add-post
+
+datainsidedata-community-projects/
+→ feat/community-projects
+
+datainsidedata-builder-staging/
+→ feat/builder-staging
+
+datainsidedata-integration/
+→ integration/did-merge
+</code></pre></div></div>
+
+<p>Each folder can be opened in a separate VS Code window.</p>
+
+<p>Each folder can stay on its own branch.</p>
+
+<blockquote>
+  <p>This is the big unlock.</p>
+</blockquote>
+
+<h3 id="why-this-works">Why This Works</h3>
+
+<p>Worktrees reduce confusion because the folder no longer has to transform every time I switch branches.</p>
+
+<p>So instead of this:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>one folder
+→ switch branch
+→ folder changes shape
+→ generated files remain
+→ ignored files remain
+→ branch-specific folders appear or disappear
+</code></pre></div></div>
+
+<p>I get this:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>one folder per major branch
+→ each branch keeps its own working directory
+→ less accidental carryover
+→ easier local testing
+→ easier staging deployments
+</code></pre></div></div>
+
+<h3 id="important-mental-model">Important Mental Model</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>A branch is a line of commits.
+
+A working tree is a folder where one branch is checked out.
+
+A worktree is an additional working folder connected to the same Git repository.
+</code></pre></div></div>
+
+<p>That means it is an official Git-managed checkout.</p>
+
+<h3 id="copypasting-folders">Copy/Pasting Folders</h3>
+
+<p>Copying an entire repo folder manually can create confusion because Git does not know the intent behind the copy.</p>
+
+<p>Manual copying can overwrite files, carry generated folders, duplicate ignored files, or mix work from branches that should stay separate.</p>
+
+<p><code class="language-plaintext highlighter-rouge">git worktree</code> is better because Git manages the relationship between the folders and the branches.</p>
+
+<p>Instead of this for example:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>copy entire folder manually
+paste into another backup folder
+switch branches
+copy files back
+wonder what changed
+</code></pre></div></div>
+
+<p>Do this:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">worktree</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-add-post</span><span class="w"> </span><span class="nx">feat/add-post</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Now Git creates a real branch-specific workspace.</p>
+
+<h3 id="check-existing-worktrees">Check Existing Worktrees</h3>
+
+<p>Before creating new worktrees, check what already exists:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">worktree</span><span class="w"> </span><span class="nx">list</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Example output:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C:/Users/.../.../datainsidedata-website                 abc1234 [main]
+C:/Users/.../.../datainsidedata-add-post                def5678 [feat/add-post]
+C:/Users/.../.../datainsidedata-builder-staging         789abcd [feat/builder-staging]
+</code></pre></div></div>
+
+<p>This command shows which folders are connected to which branches.</p>
+
+<h3 id="create-a-worktree-for-an-existing-local-branch">Create a Worktree for an Existing Local Branch</h3>
+
+<p>From the main repo folder, create a separate folder for an existing branch:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">worktree</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-add-post</span><span class="w"> </span><span class="nx">feat/add-post</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Create one for Builder Showcase:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">worktree</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-community-projects</span><span class="w"> </span><span class="nx">feat/community-projects</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Create one for staging:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">worktree</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-builder-staging</span><span class="w"> </span><span class="nx">feat/builder-staging</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Create one for integration:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">worktree</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-integration</span><span class="w"> </span><span class="nx">integration/did-merge</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Each folder can now be opened separately in VS Code.</p>
+
+<h3 id="open-a-worktree-in-vs-code">Open a Worktree in VS Code</h3>
+
+<p>Open the new worktree folder:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">code</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-add-post</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Or:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">code</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-builder-staging</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This creates a cleaner workflow because each VS Code window is tied to a specific branch folder.</p>
+
+<h3 id="create-a-new-branch-and-worktree-together">Create a New Branch and Worktree Together</h3>
+
+<p>Sometimes the branch does not exist yet.</p>
+
+<p>For example, a staging campaign branch:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">worktree</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="nt">-b</span><span class="w"> </span><span class="nx">staging/builder-showcase-campaign</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-staging-campaign</span><span class="w"> </span><span class="nx">main</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This means:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Create a new branch named staging/builder-showcase-campaign
+starting from main
+and check it out into ../datainsidedata-staging-campaign
+</code></pre></div></div>
+
+<p>Then push it:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cd</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-staging-campaign</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">push</span><span class="w"> </span><span class="nt">-u</span><span class="w"> </span><span class="nx">origin</span><span class="w"> </span><span class="nx">staging/builder-showcase-campaign</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="create-a-worktree-from-a-remote-branch">Create a Worktree from a Remote Branch</h3>
+
+<p>If the branch exists on GitHub but not locally, fetch first:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">fetch</span><span class="w"> </span><span class="nx">origin</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Then create a local branch and worktree from the remote branch:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">worktree</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="nt">-b</span><span class="w"> </span><span class="nx">feat/add-post</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-add-post</span><span class="w"> </span><span class="nx">origin/feat/add-post</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This is useful when the remote branch exists but the local branch does not.</p>
+
+<h3 id="important-rule-about-branches-and-worktrees">Important Rule About Branches and Worktrees</h3>
+
+<p>Git usually does not allow the same branch to be checked out in two worktrees at the same time.</p>
+
+<p>That means if <code class="language-plaintext highlighter-rouge">feat/add-post</code> is already checked out in:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>datainsidedata-add-post/
+</code></pre></div></div>
+
+<p>Git will usually stop me from also checking out <code class="language-plaintext highlighter-rouge">feat/add-post</code> in:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>datainsidedata-website/
+</code></pre></div></div>
+
+<p>That is a safety feature.</p>
+
+<p>It prevents two folders from editing the same branch at the same time and confusing the branch state.</p>
+
+<h3 id="suggested-folder-layout">Suggested Folder Layout</h3>
+
+<p>A clean local layout could look something like this:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GitHub_Folders/
+  datainsidedata-website/
+  datainsidedata-add-post/
+  datainsidedata-community-projects/
+  datainsidedata-builder-staging/
+  datainsidedata-integration/
+  datainsidedata-staging-campaign/
+</code></pre></div></div>
+
+<p>Each folder has one job.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>datainsidedata-website/
+→ main or general admin workspace
+
+datainsidedata-add-post/
+→ content work
+
+datainsidedata-community-projects/
+→ Builder Showcase feature work
+
+datainsidedata-builder-staging/
+→ staging workflow hardening
+
+datainsidedata-integration/
+→ combined release candidate testing
+
+datainsidedata-staging-campaign/
+→ public testing campaign branch
+</code></pre></div></div>
+
+<h3 id="datainsidedata-branch-map">DataInsideData Branch Map</h3>
+
+<p>The branch map can look like this:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>feat/add-post
+→ write and update content
+
+feat/builder-staging
+→ maintain staging deploy workflow
+
+integration/did-merge
+→ combine approved work for release testing
+
+main
+→ protected production-ready base
+</code></pre></div></div>
+
+<h3 id="recommended-worktree-setup-commands">Recommended Worktree Setup Commands</h3>
+
+<p>From the original private repo folder:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">worktree</span><span class="w"> </span><span class="nx">list</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Create content worktree:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">worktree</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-add-post</span><span class="w"> </span><span class="nx">feat/add-post</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Create integration worktree:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">worktree</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-integration</span><span class="w"> </span><span class="nx">integration/did-merge</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="working-in-a-feature-worktree">Working in a Feature Worktree</h3>
+
+<p>Open the feature worktree:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cd</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-community-projects</span><span class="w">
+</span><span class="n">code</span><span class="w"> </span><span class="o">.</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Work normally:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">status</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="o">.</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">commit</span><span class="w"> </span><span class="nt">-m</span><span class="w"> </span><span class="s2">"Update submit form"</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">push</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This keeps work in its own folder and branch.</p>
+
+<p><strong>Working in the Content Worktree</strong>:</p>
+
+<p>Open the content worktree:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cd</span><span class="w"> </span><span class="o">..</span><span class="nx">/datainsidedata-add-post</span><span class="w">
+</span><span class="n">code</span><span class="w"> </span><span class="o">.</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Work normally:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span><span class="w"> </span><span class="nx">status</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="o">.</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">commit</span><span class="w"> </span><span class="nt">-m</span><span class="w"> </span><span class="s2">"Add Git branch switching fixes guide"</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">push</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This keeps posts, how-tos, and fixes separate from other work.</p>
+
+<h3 id="worktree-and-ignored-files">Worktree and Ignored Files</h3>
+
+<p>Each worktree has its own working folder.</p>
+
+<p>That means ignored files like <code class="language-plaintext highlighter-rouge">.env</code> are not automatically shared across all worktrees.</p>
+
+<p>If a worktree needs local secrets, it may need its own <code class="language-plaintext highlighter-rouge">.env</code>.</p>
+
+<p>Example:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>datainsidedata-community-projects/.env
+datainsidedata-builder-staging/.env
+datainsidedata-integration/.env
+</code></pre></div></div>
+
+<p>Because <code class="language-plaintext highlighter-rouge">.env</code> is ignored, it should stay out of Git.</p>
+
+<p>A safe pattern is:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.env
+→ ignored and manually backed up
+
+.env.example
+→ tracked as a template
+</code></pre></div></div>
+
+<h3 id="worktree-and-generated-files">Worktree and Generated Files</h3>
+
+<p>If you’re using <a href="/did-builder-showcase-staging/blog/2026/01/26/did-Minima-to-minimal-mistakes-migration/">Jekyll (Minimal Mistakes)</a> generated files,these are also per worktree.</p>
+
+<p>Each worktree may create its own:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>_site/
+_site_staging_full/
+.jekyll-cache/
+.sass-cache/
+etc...
+</code></pre></div></div>
+
+<p>That’s okay.</p>
+
+<p>Those should stay ignored and rebuildable.</p>
+
+<p>If a generated folder causes confusion, delete it inside that worktree and rebuild.</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Remove-Item</span><span class="w"> </span><span class="nt">-Recurse</span><span class="w"> </span><span class="nt">-Force</span><span class="w"> </span><span class="o">.</span><span class="nx">\.jekyll-cache</span><span class="w">
+</span><span class="n">Remove-Item</span><span class="w"> </span><span class="nt">-Recurse</span><span class="w"> </span><span class="nt">-Force</span><span class="w"> </span><span class="o">.</span><span class="nx">\.folder-name</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Then rebuild:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">bundle</span><span class="w"> </span><span class="nx">exec</span><span class="w"> </span><span class="nx">jekyll</span><span class="w"> </span><span class="nx">build</span><span class="w"> </span><span class="nx">serve</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="worktree-and-dependencies">Worktree and Dependencies</h3>
+
+<p>Depending on the project setup, each worktree may also need its own dependency install or bundle path.</p>
+
+<p>For a Jekyll project, if dependencies are managed outside the repo globally, the worktree may already build.</p>
+
+<p>If local vendor folders are used, each worktree may need setup.</p>
+
+<p>Useful check:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">bundle</span><span class="w"> </span><span class="nx">install</span><span class="w">
+</span><span class="n">bundle</span><span class="w"> </span><span class="nx">exec</span><span class="w"> </span><span class="nx">jekyll</span><span class="w"> </span><span class="nx">build</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Keep dependency folders ignored:</p>
+
+<pre><code class="language-gitignore">vendor/
+node_modules/
+</code></pre>
+
+<p>Check out <a href="/did-builder-showcase-staging/how-tos/2-git-worktree-workflow-guide-datainsidedata/">Part 2 here</a></p>
+
+<hr />
+
+<p><em>Data Inside Data™</em>.</p>
+
+<p><em>Tech Hands, a Science Mind, and a Heart for Community</em>.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time class="dt-published" datetime="2026-08-01T11:30:50+00:00">August 1, 2026</time></p>
+
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="#" class="pagination--pager disabled">Previous</a>
+    
+    
+      <a href="/did-builder-showcase-staging/how-tos/1-supabase-ingestion-how-to/" class="pagination--pager" title="Part 1: Building a Secure Submission Pipeline with Jekyll, Supabase Edge Function , and Postgres">Next</a>
+    
+  </nav>
+
+
+    </div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+      
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <footer class="page__footer" role="contentinfo">
+  <div class="page__footer-inner">
+    <div class="page__footer-grid">
+
+      <!-- LEFT: Title + email + quick links -->
+      <div class="page__footer-col">
+        <h2 class="page__footer-title">DataInsideData™ Staging</h2>
+
+        
+          <p class="page__footer-email">
+            <a href="mailto:contact@datainsidedata.com">contact@datainsidedata.com</a>
+          </p>
+        
+
+    <ul class="page__footer-quicklinks">
+     
+    <li>
+      <a href="/did-builder-showcase-staging/archive/">Archive</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/sitemap.xml">Sitemap</a>
+    </li>
+        
+    <li>
+      <a href="/did-builder-showcase-staging/feed.xml">RSS</a>
+    </li>
+        
+     </ul>
+
+      </div>
+
+      <!-- MIDDLE: Social links (MM style) -->
+      <div class="page__footer-col">
+        <div class="page__footer-follow">
+          <ul class="social-icons">
+            
+              
+                
+                  <li>
+                    <a href="https://github.com/dataeden" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-github" aria-hidden="true"></i>
+                      <span class="label">GitHub</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="mailto:contact@datainsidedata.com" rel="nofollow noopener noreferrer">
+                      <i class="fas fa-fw fa-envelope" aria-hidden="true"></i>
+                      <span class="label">Email</span>
+                    </a>
+                  </li>
+                
+              
+                
+                  <li>
+                    <a href="https://www.linkedin.com/" rel="nofollow noopener noreferrer">
+                      <i class="fab fa-fw fa-linkedin" aria-hidden="true"></i>
+                      <span class="label">LinkedIn</span>
+                    </a>
+                  </li>
+                
+              
+            
+
+            
+              <li>
+                <a href="/did-builder-showcase-staging/feed.xml">
+                  <i class="fas fa-fw fa-rss-square" aria-hidden="true"></i>
+                  <span class="label">Feed</span>
+                </a>
+              </li>
+            
+          </ul>
+        </div>
+      </div>
+
+      <!-- RIGHT: Description -->
+      <div class="page__footer-col">
+        
+          <p class="page__footer-desc">Staging preview for DataInsideData™ and Builder Showcase testing.</p>
+        
+      </div>
+
+    </div>
+
+    <!-- Footer bottom bar (your DID style) -->
+    <div class="footer-bottom">
+      <p class="footer-bottom__copyright">
+        © 2026 Data Inside Data™. All rights reserved.
+      </p>
+
+      <p class="footer-bottom__powered">
+        Powered by
+        <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>,
+        <a href="https://pages.github.com" target="_blank" rel="noopener">GitHub Pages</a>, and
+        <a href="https://aws.amazon.com/route53/" target="_blank" rel="noopener">AWS Route 53</a>.
+      </p>
+
+      <p class="footer-bottom__legal">
+        <a href="/did-builder-showcase-staging/privacy/">Privacy Policy</a>
+        <span class="footer-bottom__sep">•</span>
+        <a href="/did-builder-showcase-staging/terms/">Terms of Use</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+      </footer>
+    </div>
+
+    
+  <script src="/did-builder-showcase-staging/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr.min.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-store.js"></script>
+<script src="/did-builder-showcase-staging/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+  
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  
+    <script src="/did-builder-showcase-staging/assets/js/mermaid-init.js"></script>
+  
+
+
+  </body>
+</html>
